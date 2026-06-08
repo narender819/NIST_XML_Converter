@@ -1,0 +1,143 @@
+ThermoCase              a
+MethodSlate             SRK_LIBCOR_NIST
+CompSlate               NIST_COMP
+LocalThermoOptions      DEFAULT
+LocalThermoSet          DEFAULT
+
+// This is a test for single-group components
+// ------------------------------------------
+
+Phase                  VAPOR
+Comp	   {COMPONENT_NAME}	 1
+
+Property           HIG 
+Temp(K)	          {NBP}
+Pres(kPa)         101.325
+CalcNow		  HIG@NBP(J/kg-mole)
+
+
+Property          H
+Temp(K)	          {NBP}
+Pres(kPa)         101.325
+CalcNow		  HV@NBP(J/kg-mole)
+
+
+Property          HIG
+Temp(K)	          {ICP_Tnbp}
+Pres(kPa)         101.325
+CalcNow		  HIG@Tnbp(J/kg-mole)
+
+Property          HIG
+Temp(K)	          {ICPtmax}
+Pres(kPa)         101.325
+CalcNow		  HIG@Tmax(J/kg-mole)
+
+Property          HIVAP
+Temp(K)	          {NBP}
+Pres(kPa)         101.325
+CalcNow		  HVAP@NBP(KJ/kg-mole)
+
+Property          PISAT
+Temp(K)	          {TTP}
+Pres(kPa)         101.325
+CalcNow		  PTP@TTP(Kpa)
+
+Property          PISAT
+Temp(K)	          {TC}
+Pres(kPa)         101.325
+CalcNow		  Pc_Calc(Kpa)
+
+
+
+#################################################################
+
+
+Phase                  LIQUID
+Comp	{COMPONENT_NAME}	         1
+
+Property             H
+Temp(K)	          273.15
+Pres(kPa)         101.325
+CalcNow		  HL@0C(J/kg-mole)
+
+Property            H
+Temp(K)	          {LCPtmin}
+Pres(kPa)         101.325
+CalcNow		  HL@Tmin(J/kg-mole)
+
+Property            H
+Temp(K)	          {LCPtmax}
+Pres(kPa)         101.325
+CalcNow		  HL@Tmax(J/kg-mole)
+
+Property          H
+Temp(K)	          {ICP_Tnbp}
+Pres(kPa)         101.325
+CalcNow		  HL@Tnbp(J/kg-mole)
+
+Property          H
+Temp(K)	          {SCP_Tnmp}
+Pres(kPa)         101.325
+CalcNow		  HL@Tnmp(J/kg-mole)
+
+Property            H
+Temp(K)	          {NBP}
+Pres(kPa)         101.325
+CalcNow		  HL@NBP(J/kg-mole)
+
+Property            H
+Temp(K)	          {NMP}
+Pres(kPa)         101.325
+CalcNow		  HL@NMP(J/kg-mole)
+
+Property            DHDT
+Temp(K)	          {LCPtmin}
+Pres(kPa)         101.325
+CalcNow		  dHL/dT@Tmin
+
+Property            DHDT
+Temp(K)	          {LCPtmax}
+Pres(kPa)         101.325
+CalcNow		  dHL/dT@Tmax
+
+Property            DHDT
+Temp(K)	          {NBP}
+Pres(kPa)         101.325
+CalcNow		  dHL/dT@NBP
+
+Property          HIVAP
+Temp(K)	          {ICP_Tnbp}
+Pres(kPa)         101.325
+CalcNow		  HVAP@Tnbp(J/kg-mole)
+
+Property          HIVAP
+Temp(K)	          {HVAP_Tmid}
+Pres(kPa)         101.325
+CalcNow		  HVAP@Mid (J/kg-mole)
+
+Property          RHO
+Temp(K)	          288.706
+Pres(kPa)         101.325
+CalcNow	          LDEN@60F (kg/m3) 
+
+Property          RHO
+Temp(K)	          298.15
+Pres(kPa)         101.325
+CalcNow	          LDEN@25C (kg/m3) 
+
+
+###############################################################
+
+#Phase                  SOLID
+#comp	{COMPONENT_NAME}	         1
+
+#Property        H
+#Temp(K)	   {SCP_Tnmp}
+#Pres(kPa)         101.325
+#CalcNow	   HS@Tnmp(J/kg-mole)
+
+#Property          H
+#Temp(K)	          {SCPtmax}
+#Pres(kPa)         101.325
+#CalcNow		  HS@Tmax(J/kg-mole)
+

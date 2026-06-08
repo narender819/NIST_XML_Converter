@@ -1,0 +1,71 @@
+ThermoCase              a
+MethodSlate             SRK_LIBCOR_NIST
+CompSlate               NIST_COMP
+LocalThermoOptions      DEFAULT
+LocalThermoSet          DEFAULT
+
+// This is a test for single-group components
+// ------------------------------------------
+Phase                  VAPOR
+Comp	   {COMPONENT_NAME}	 1
+
+Property             H
+Temp(K)	          {ICP_Trecon_NIST}
+Pres(kPa)         101.325
+CalcNow		  HIG@Trecon_NIST
+
+Property            H
+Temp(K)	          {IEtmin}
+Pres(kPa)         101.325
+CalcNow		  HIG@Tmin_NIST
+
+Property            H
+Temp(K)	          {IEtmax}
+Pres(kPa)         101.325
+CalcNow		  HIG@Tmax_NIST
+
+
+#################################################################
+
+
+Phase                  LIQUID
+Comp	{COMPONENT_NAME}	         1
+
+
+Property            H
+Temp(K)	          {LCP_Trecon_NIST}
+Pres(kPa)         101.325
+CalcNow		  HL@Trecon_NIST
+
+Property            H
+Temp(K)	          {LEtmin}
+Pres(kPa)         101.325
+CalcNow		  HL@Tmin_NIST
+
+Property            H
+Temp(K)	          {LEtmax}
+Pres(kPa)         101.325
+CalcNow		  HL@Tmax_NIST
+
+
+
+###############################################################
+
+#Phase                  SOLID
+#Comp	{COMPONENT_NAME}	         1
+
+
+#Property            H
+#Temp(K)	    {SCP_Trecon_NIST}
+#Pres(kPa)         101.325
+#CalcNow	   HS@Trecon_NIST
+
+#Property            H
+#Temp(K)	   {SEtmin}
+#Pres(kPa)         101.325
+#CalcNow	   HS@Tmin_NIST
+
+#Property            H
+#Temp(K)	    {SEtmax}
+#Pres(kPa)         101.325
+#CalcNow	  HS@Tmax_NIST

@@ -1,0 +1,33 @@
+# Generated Data
+output/
+logs/
+
+# Old Pipeline Copies
+pipeline_final/
+
+# Documentation Working Area (if not ready)
+Documents/
+
+# Database Files
+db/
+
+# Virtual Environment
+.venv/
+
+# Python
+__pycache__/
+*.pyc
+
+# Excel Temp Files
+~$*.xlsx
+
+# IDE
+.vscode/
+.idea/
+
+# SIMSCI Library Files
+prerequisites/libraries/SIMSCI/
+prerequisites/executables/FlashDriver/
+
+#bat files
+batfiles/
