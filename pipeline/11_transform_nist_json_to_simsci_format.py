@@ -40,48 +40,72 @@ import ast
 
 from pathlib import Path
 
-# ==================================================
-# CONFIGURATION
-# ==================================================
-RUN_YEAR = "2025"
+from config import (
+    RUN_YEAR,
+    OUTPUT_DIR,
+    PROCESSED_DIR,
+    PREREQ_DIR,
+    LOG_DIR,
+    ensure_directories
+)
 
-BASE_DIR = Path(r"D:\NIST_XML_Converter")
+ensure_directories()
 
 # ==================================================
 # PREREQUISITE DIRECTORIES
 # ==================================================
-PREREQ_DIR = BASE_DIR / "prerequisites"
 
 EXCEL_INPUT_DIR = PREREQ_DIR / "excel_inputs"
 
 # ==================================================
 # OUTPUT DIRECTORIES
 # ==================================================
-OUTPUT_DIR = BASE_DIR / "output" / RUN_YEAR
 
 JSON_DIR = OUTPUT_DIR / "json"
-
 SMILES_DIR = OUTPUT_DIR / "smiles"
 
-PROCESSED_DIR = ( OUTPUT_DIR / "processed" / "full_library" / "1_components_Inmaster_withsimsciid")
+#  Keep base processed dir from config
+# Add subfolders properly
 
-LOG_DIR = BASE_DIR / "logs"
+PROCESSED_MASTER_DIR = PROCESSED_DIR / "1_components_Inmaster_withsimsciid"
+
+
+#  Create only NEW subfolders
+PROCESSED_MASTER_DIR.mkdir(parents=True, exist_ok=True)
+
 
 # ==================================================
-# INPUT / OUTPUT FILES
+# INPUT FILES
 # ==================================================
-MASTER_FILE = ( EXCEL_INPUT_DIR / "5_Master_Component_List.xlsx")
 
-LIB_XML_EXTRACT_FILE = ( OUTPUT_DIR / "processed" / "full_library" / "2_Libraries_XML_Component_Extract.xlsx")
+MASTER_FILE = EXCEL_INPUT_DIR / "5_Master_Component_List.xlsx"
 
-CONFIG_FILE = (EXCEL_INPUT_DIR / "6_NIST_Property_Mappings_Template.xlsx")
-
-SMILES_FILE = (SMILES_DIR / f"2_compounds_smiles_{RUN_YEAR}_removedblanks.xlsx")
-
-UNMATCHED_FILE = ( JSON_DIR / "unmatched_components.xlsx"
+LIB_XML_EXTRACT_FILE = (
+    PROCESSED_DIR / "2_Libraries_XML_Component_Extract.xlsx"
 )
 
-PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
+CONFIG_FILE = EXCEL_INPUT_DIR / "6_NIST_Property_Mappings_Template.xlsx"
+
+SMILES_FILE = SMILES_DIR / f"2_compounds_smiles_{RUN_YEAR}_removedblanks.xlsx"
+
+UNMATCHED_FILE = JSON_DIR / "unmatched_components.xlsx"
+
+# ==================================================
+#  VALIDATION (IMPORTANT)
+# ==================================================
+
+if not MASTER_FILE.exists():
+    raise FileNotFoundError(f"Missing input: {MASTER_FILE}")
+
+if not LIB_XML_EXTRACT_FILE.exists():
+    raise FileNotFoundError(f"Missing input: {LIB_XML_EXTRACT_FILE}")
+
+if not CONFIG_FILE.exists():
+    raise FileNotFoundError(f"Missing input: {CONFIG_FILE}")
+
+if not SMILES_FILE.exists():
+    raise FileNotFoundError(f"Missing input: {SMILES_FILE}")
+
 
 # logging.basicConfig(filename="property_extraction.log", level=logging.INFO)
 logging.basicConfig(
@@ -808,7 +832,7 @@ if __name__ == "__main__":
 
 
         # Write output JSON using original filename
-        out_file = os.path.join(PROCESSED_DIR, os.path.basename(json_file))
+        out_file = os.path.join(PROCESSED_MASTER_DIR, os.path.basename(json_file))
         with open(out_file, "w", encoding="utf-8") as out:
             json.dump(mapped_props, out, indent=2)
     # Write unmatched list if any
@@ -823,8 +847,7 @@ if __name__ == "__main__":
     if duplicates_list:
         pd.DataFrame(duplicates_list).to_excel(duplicates_file, index=False)
     # Process not processed JSON files
-    NOT_PROCESSED_DIR = (OUTPUT_DIR/ "processed"/ "full_library"/ "2_components_notInmaster_nosimsciid")
-
+    NOT_PROCESSED_DIR = PROCESSED_DIR / "2_components_notInmaster_nosimsciid"
     NOT_PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
     all_json_files = []
     for fname in os.listdir(JSON_DIR):

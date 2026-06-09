@@ -26,49 +26,39 @@ Output:
 import pandas as pd
 from pathlib import Path
 
-# ==================================================
-# CONFIGURATION
-# ==================================================
-RUN_YEAR = "2025"
+from config import (
+    RUN_YEAR,
+    PREREQ_DIR,
+    PROCESSED_DIR,
+    ensure_directories
+)
 
-BASE_DIR = Path(r"D:\NIST_XML_Converter")
+ensure_directories()
 
 # ==================================================
-# PREREQUISITE DIRECTORIES
+# PREREQUISITE DIRECTORIES (derived locally)
 # ==================================================
-PREREQ_DIR = BASE_DIR / "prerequisites"
 
 EXCEL_INPUT_DIR = PREREQ_DIR / "excel_inputs"
 
 # ==================================================
-# OUTPUT DIRECTORIES
-# ==================================================
-OUTPUT_DIR = BASE_DIR / "output" / RUN_YEAR
-
-PROCESSED_DIR = OUTPUT_DIR / "processed" / "full_library"
-
-# ==================================================
 # INPUT / OUTPUT FILES
 # ==================================================
-EXCEL1 = (
-    PROCESSED_DIR
-    / "5_DIPPR_Family_Extraction_withfamilyAbbrevations.xlsx"
-)
 
-EXCEL2 = (
-    EXCEL_INPUT_DIR
-    / "4_DIPPR_Family_Mapping_with_Remarks.xlsx"
-)
+EXCEL1 = PROCESSED_DIR / "5_DIPPR_Family_Extraction_withfamilyAbbrevations.xlsx"
 
-OUTPUT_MAIN = (
-    PROCESSED_DIR
-    / "6_DIPPR_Family_Group_Assigned.xlsx"
-)
+EXCEL2 = EXCEL_INPUT_DIR / "4_DIPPR_Family_Mapping_with_Remarks.xlsx"
 
-OUTPUT_MISMATCH = (
-    PROCESSED_DIR
-    / "6_DIPPR_Group_Mismatch_Log.xlsx"
-)
+if not EXCEL1.exists():
+    raise FileNotFoundError(f"Missing input: {EXCEL1}")
+
+if not EXCEL2.exists():
+    raise FileNotFoundError(f"Missing input: {EXCEL2}")
+
+OUTPUT_MAIN = PROCESSED_DIR / "6_DIPPR_Family_Group_Assigned.xlsx"
+
+OUTPUT_MISMATCH = PROCESSED_DIR / "6a_DIPPR_Group_Mismatch_Log.xlsx"
+
 
 
 # ---------------------------------------------------

@@ -33,64 +33,52 @@ from pathlib import Path
 
 from pathlib import Path
 
-# ==================================================
-# CONFIGURATION
-# ==================================================
-RUN_YEAR = "2025"
+from config import (
+    RUN_YEAR,
+    PREREQ_DIR,
+    XML_LIBRARY_DIR,
+    ensure_directories
+)
 
-BASE_DIR = Path(r"D:\NIST_XML_Converter")
+ensure_directories()
 
 # ==================================================
 # PREREQUISITES
 # ==================================================
-PREREQ_DIR = (
-    BASE_DIR
-    / "prerequisites"
-)
 
-EXCEL_INPUTS_DIR = (
-    PREREQ_DIR
-    / "excel_inputs"
-)
+EXCEL_INPUTS_DIR = PREREQ_DIR / "excel_inputs"
 
-EXCEL_PATH = (
-    EXCEL_INPUTS_DIR
-    / "9_Components_Blacklist_Missing_Criticals.xlsx"
-)
-
-# ==================================================
-# OUTPUT DIRECTORIES
-# ==================================================
-OUTPUT_BASE_DIR = (
-    BASE_DIR
-    / "output"
-    / RUN_YEAR
-)
-
-XML_BASE_DIR = (
-    OUTPUT_BASE_DIR
-    / "xml"
-)
+EXCEL_PATH = EXCEL_INPUTS_DIR / "9_Components_Blacklist_Missing_Criticals.xlsx"
 
 # ==================================================
 # XML INPUT / OUTPUT
 # ==================================================
-XML_INPUT_DIR = (
-    XML_BASE_DIR
-    / "Libraryfiles_NIST"
-    / "04_casnum_updated"
-)
 
-OUTPUT_DIR = (
-    XML_BASE_DIR
-    / "Libraryfiles_NIST"
-    / "05_blacklist_processed"
-)
+XML_INPUT_DIR = XML_LIBRARY_DIR / "04_casnum_updated"
 
-OUTPUT_DIR.mkdir(
-    parents=True,
-    exist_ok=True
-)
+OUTPUT_DIR = XML_LIBRARY_DIR / "05_blacklist_processed"
+
+#  Create only required output folder
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
+# ==================================================
+# VALIDATION 
+# ==================================================
+
+if not EXCEL_PATH.exists():
+    raise FileNotFoundError(f"Missing input: {EXCEL_PATH}")
+
+if not XML_INPUT_DIR.exists():
+    raise FileNotFoundError(f"Missing XML folder: {XML_INPUT_DIR}")
+
+# ==================================================
+# DEBUG (optional)
+# ==================================================
+
+print("Excel input:", EXCEL_PATH)
+print("XML input dir:", XML_INPUT_DIR)
+print("XML output dir:", OUTPUT_DIR)
+
 
 # ---------------- READ TRCID COLUMN ----------------
 def read_trcid_sheet(sheet_name):
@@ -116,7 +104,7 @@ included_set = read_trcid_sheet("BlackList_Included")
 # ---------------- OVERLAP CHECK ----------------
 overlap = excluded_set.intersection(included_set)
 if overlap:
-    print(f"⚠️ Warning: TRCID present in both sheets: {overlap}")
+    print(f" Warning: TRCID present in both sheets: {overlap}")
 
 # ---------------- LOG TRACKING ----------------
 report_data = []

@@ -29,35 +29,30 @@ import pandas as pd
 
 from pathlib import Path
 
-# ==================================================
-# CONFIGURATION
-# ==================================================
-RUN_YEAR = "2025"
+from config import (
+    RUN_YEAR,
+    PREREQ_DIR,
+    PROCESSED_DIR,
+    ensure_directories
+)
 
-BASE_DIR = Path(r"D:\NIST_XML_Converter")
+ensure_directories()
 
 # ==================================================
 # PREREQUISITE DIRECTORIES
 # ==================================================
-PREREQ_DIR = BASE_DIR / "prerequisites"
 
 EXCEL_INPUT_DIR = PREREQ_DIR / "excel_inputs"
 
 # ==================================================
-# OUTPUT DIRECTORIES
-# ==================================================
-OUTPUT_DIR = BASE_DIR / "output" / RUN_YEAR
-
-PROCESSED_DIR = (OUTPUT_DIR/ "processed"/ "full_library")
-
-# ==================================================
 # INPUT / OUTPUT FILES
 # ==================================================
-main_file = (PROCESSED_DIR/ f"10_NIST_Component_KeyThermoProperties_{RUN_YEAR}.xlsx")
 
-source_file = (EXCEL_INPUT_DIR/ "7_TC_PC_AF_extracted.xlsx")
+main_file = PROCESSED_DIR / f"10_NIST_Component_KeyThermoProperties_{RUN_YEAR}.xlsx"
 
-output_file = (PROCESSED_DIR/ f"12_NIST_Component_KeyThermoProperties_{RUN_YEAR}_TCPCAF_UPDATED.xlsx")
+source_file = EXCEL_INPUT_DIR / "7_TC_PC_AF_extracted.xlsx"
+
+output_file = PROCESSED_DIR / f"12_NIST_Component_KeyThermoProperties_{RUN_YEAR}_TCPCAF_UPDATED.xlsx"
 
 
 # ---------------------------------------------------

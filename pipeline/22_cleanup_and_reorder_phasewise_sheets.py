@@ -27,60 +27,32 @@ import pandas as pd
 from openpyxl import load_workbook
 from pathlib import Path
 
-def auto_adjust_column_widths(excel_path, max_width=40, padding=2):
-    wb = load_workbook(excel_path)
 
-    for ws in wb.worksheets:
-        for column_cells in ws.columns:
-            max_len = 0
-            col_letter = column_cells[0].column_letter
+from utils import auto_adjust_column_widths
 
-            for cell in column_cells:
-                if cell.value is not None:
-                    max_len = max(max_len, len(str(cell.value)))
-
-            adjusted = min(max_len + padding, max_width)
-            ws.column_dimensions[col_letter].width = adjusted
-
-    wb.save(excel_path)
-
-
-
-# ==================================================
-# CONFIGURATION
-# ==================================================
-RUN_YEAR = "2025"
-
-BASE_DIR = Path(r"D:\NIST_XML_Converter")
-
-# ==================================================
-# OUTPUT DIRECTORIES
-# ==================================================
-OUTPUT_DIR = BASE_DIR / "output" / RUN_YEAR
-
-PROCESSED_DIR = (
-    OUTPUT_DIR
-    / "processed"
-    / "full_library"
+from config import (
+    RUN_YEAR,
+    PROCESSED_DIR,
+    ensure_directories
 )
 
-PROCESSED_DIR.mkdir(
-    parents=True,
-    exist_ok=True
-)
+ensure_directories()
 
 # ==================================================
 # INPUT / OUTPUT FILES
 # ==================================================
-INPUT_EXCEL = (
-    PROCESSED_DIR
-    / f"16_NIST_With_SIMSCI_Trecon.xlsx"
-)
 
-OUTPUT_EXCEL = (
-    PROCESSED_DIR
-    / f"17_NIST_With_SIMSCI_Trecon_Clean.xlsx"
-)
+INPUT_EXCEL = PROCESSED_DIR / f"16_NIST_With_SIMSCI_Trecon.xlsx"
+
+OUTPUT_EXCEL = PROCESSED_DIR / f"17_NIST_With_SIMSCI_Trecon_Clean.xlsx"
+
+# ==================================================
+# VALIDATION 
+# ==================================================
+
+if not INPUT_EXCEL.exists():
+    raise FileNotFoundError(f"Missing input: {INPUT_EXCEL}")
+
 
 
 # ---------------------------------------------------

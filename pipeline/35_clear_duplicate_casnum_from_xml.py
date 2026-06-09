@@ -32,71 +32,55 @@ from pathlib import Path
 import pandas as pd
 import re
 
+from config import (
+    RUN_YEAR,
+    PREREQ_DIR,
+    XML_DIR,
+    XML_LIBRARY_DIR,
+    ensure_directories
+)
 
-# ==================================================
-# CONFIGURATION
-# ==================================================
-RUN_YEAR = "2025"
-
-BASE_DIR = Path(r"D:\NIST_XML_Converter")
+ensure_directories()
 
 # ==================================================
 # PREREQUISITES
 # ==================================================
-PREREQ_DIR = (
-    BASE_DIR
-    / "prerequisites"
-)
 
-EXCEL_INPUTS_DIR = (
-    PREREQ_DIR
-    / "excel_inputs"
-)
+EXCEL_INPUTS_DIR = PREREQ_DIR / "excel_inputs"
 
-EXCEL_INPUT = (
-    EXCEL_INPUTS_DIR
-    / "8_NIST_Components_SameCAS.xlsx"
-)
+EXCEL_INPUT = EXCEL_INPUTS_DIR / "8_NIST_Components_SameCAS.xlsx"
 
 # ==================================================
-# OUTPUT DIRECTORIES
+# XML DIRECTORIES
 # ==================================================
-OUTPUT_DIR = (
-    BASE_DIR
-    / "output"
-    / RUN_YEAR
-)
 
-XML_BASE_DIR = (
-    OUTPUT_DIR
-    / "xml"
-)
+XML_SOURCE_DIR = XML_LIBRARY_DIR / "03_iccalc_updated_C1"
+
+XML_OUTPUT_DIR = XML_LIBRARY_DIR / "04_casnum_updated"
+
+REPORT_FILE = XML_LIBRARY_DIR / "04_casnum_update_report.xlsx"
+
+#  Create only the new output directory
+XML_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 # ==================================================
-# XML INPUT / OUTPUT
+# VALIDATION 
 # ==================================================
-XML_SOURCE_DIR = (
-    XML_BASE_DIR
-    / "Libraryfiles_NIST"
-    / "03_iccalc_updated_C1"
-)
 
-XML_OUTPUT_DIR = (
-    XML_BASE_DIR
-    / "Libraryfiles_NIST"
-    / "04_casnum_updated"
-)
+if not EXCEL_INPUT.exists():
+    raise FileNotFoundError(f"Missing input: {EXCEL_INPUT}")
 
-REPORT_FILE = (
-    XML_BASE_DIR
-    / "Libraryfiles_NIST"
-    / "04_casnum_update_report.xlsx"
-)
+if not XML_SOURCE_DIR.exists():
+    raise FileNotFoundError(f"Missing XML source directory: {XML_SOURCE_DIR}")
 
-XML_OUTPUT_DIR.mkdir(
-    parents=True,
-    exist_ok=True
-)
+# ==================================================
+# DEBUG (optional)
+# ==================================================
+
+print("Excel input:", EXCEL_INPUT)
+print("XML source dir:", XML_SOURCE_DIR)
+print("XML output dir:", XML_OUTPUT_DIR)
+print("Report file:", REPORT_FILE)
 
 # ---------------------------------------------------
 # READ EXCEL FILE

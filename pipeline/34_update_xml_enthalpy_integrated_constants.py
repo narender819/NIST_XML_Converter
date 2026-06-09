@@ -30,60 +30,51 @@ import pandas as pd
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
-# ==================================================
-# CONFIGURATION
-# ==================================================
-RUN_YEAR = "2025"
-
-BASE_DIR = Path(r"D:\NIST_XML_Converter")
-
-# ==================================================
-# OUTPUT DIRECTORIES
-# ==================================================
-OUTPUT_DIR = (
-    BASE_DIR
-    / "output"
-    / RUN_YEAR
+from config import (
+    RUN_YEAR,
+    PROCESSED_DIR,
+    XML_DIR,
+    XML_LIBRARY_DIR,
+    ensure_directories
 )
 
-PROCESSED_DIR = (
-    OUTPUT_DIR
-    / "processed"
-    / "full_library"
-)
-
-XML_BASE_DIR = (
-    OUTPUT_DIR
-    / "xml"
-)
+ensure_directories()
 
 # ==================================================
-# INPUT FILES
+# INPUT FILE
 # ==================================================
-INPUT_EXCEL = (
-    PROCESSED_DIR
-    / f"23_NIST_ICCalc_SCP_LCP_ICP.xlsx"
-)
+
+INPUT_EXCEL = PROCESSED_DIR / f"23_NIST_ICCalc_SCP_LCP_ICP.xlsx"
 
 # ==================================================
-# XML INPUT / OUTPUT
+# XML DIRECTORIES
 # ==================================================
-XML_DIR = (
-    XML_BASE_DIR
-    / "Libraryfiles_NIST"
-    / "02_missingprop_refcode9999"
-)
 
-OUTPUT_XML_DIR = (
-    XML_BASE_DIR
-    / "Libraryfiles_NIST"
-    / "03_iccalc_updated_C1"
-)
+XML_INPUT_DIR = XML_LIBRARY_DIR / "02_missingprop_refcode9999"
 
-OUTPUT_XML_DIR.mkdir(
-    parents=True,
-    exist_ok=True
-)
+OUTPUT_XML_DIR = XML_LIBRARY_DIR / "03_iccalc_updated_C1"
+
+# Create only new output folder
+OUTPUT_XML_DIR.mkdir(parents=True, exist_ok=True)
+
+# ==================================================
+# VALIDATION 
+# ==================================================
+
+if not INPUT_EXCEL.exists():
+    raise FileNotFoundError(f"Missing input: {INPUT_EXCEL}")
+
+if not XML_INPUT_DIR.exists():
+    raise FileNotFoundError(f"Missing XML folder: {XML_INPUT_DIR}")
+
+# ==================================================
+# DEBUG (optional)
+# ==================================================
+
+print("Input Excel:", INPUT_EXCEL)
+print("XML input dir:", XML_INPUT_DIR)
+print("XML output dir:", OUTPUT_XML_DIR)
+
 
 # ---------------------------------------------------
 # LOAD EXCEL SHEETS
@@ -127,7 +118,7 @@ def update_c1(root, corr_name, new_c1):
 # ---------------------------------------------------
 processed = 0
 
-for xml_path in XML_DIR.glob("*.xml"):
+for xml_path in XML_INPUT_DIR.glob("*.xml"):
 
     alias = xml_path.stem.replace("Comp-NIST-", "")
 
@@ -175,6 +166,6 @@ for xml_path in XML_DIR.glob("*.xml"):
 # ---------------------------------------------------
 print("\n===============================")
 print(f"Total XML processed : {processed}")
-print(f"Input XML count     : {len(list(XML_DIR.glob('*.xml')))}")
+print(f"Input XML count     : {len(list(XML_INPUT_DIR.glob('*.xml')))}")
 print(f"Output XML count    : {len(list(OUTPUT_XML_DIR.glob('*.xml')))}")
 print("===============================")

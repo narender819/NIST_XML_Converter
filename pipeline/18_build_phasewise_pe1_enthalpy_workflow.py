@@ -41,63 +41,48 @@ from openpyxl import load_workbook
 
 from pathlib import Path
 
-# ==================================================
-# CONFIGURATION
-# ==================================================
-RUN_YEAR = "2025"
+from config import (
+    RUN_YEAR,
+    OUTPUT_DIR,
+    PROCESSED_DIR,
+    ensure_directories
+)
 
-BASE_DIR = Path(r"D:\NIST_XML_Converter")
+ensure_directories()
 
 # ==================================================
 # OUTPUT DIRECTORIES
 # ==================================================
-OUTPUT_DIR = BASE_DIR / "output" / RUN_YEAR
 
-PROCESSED_DIR = (
-    OUTPUT_DIR
-    / "processed"
-    / "full_library"
-)
-
-PROPEVAL_RUNS_DIR = (
-    OUTPUT_DIR
-    / "propeval_runs"
-)
+PROPEVAL_RUNS_DIR = OUTPUT_DIR / "propeval_runs"
 
 # ==================================================
 # INPUT FILES
 # ==================================================
-core_props_excel = (
-    PROCESSED_DIR
-    / f"12_NIST_Component_KeyThermoProperties_{RUN_YEAR}_TCPCAF_UPDATED.xlsx"
-)
 
-enthalpy_workflow_excel = (
-    PROCESSED_DIR
-    / f"14_NIST_Splitsheets_PE1legacy_Hdepart.xlsx"
-)
+core_props_excel = PROCESSED_DIR / f"12_NIST_Component_KeyThermoProperties_{RUN_YEAR}_TCPCAF_UPDATED.xlsx"
 
-simsci_excel = (
-    PROCESSED_DIR
-    / "2_Libraries_XML_Component_Extract.xlsx"
-)
+enthalpy_workflow_excel = PROCESSED_DIR / f"14_NIST_Splitsheets_PE1legacy_Hdepart.xlsx"
+
+simsci_excel = PROCESSED_DIR / "2_Libraries_XML_Component_Extract.xlsx"
+
+
+# ==================================================
+# Folder inputs
+# ==================================================
+COMPONENTS_MASTER_DIR = PROCESSED_DIR / "1_components_Inmaster_withsimsciid"
+COMPONENTS_ASSIGNED_DIR = PROCESSED_DIR / "3_components_notInmaster_assignedsimsciid"
 
 json_folders = [
-
-    PROCESSED_DIR
-    / "1_components_Inmaster_withsimsciid",
-
-    PROCESSED_DIR
-    / "3_components_notInmaster_assignedsimsciid"
+    COMPONENTS_MASTER_DIR,
+    COMPONENTS_ASSIGNED_DIR
 ]
 
 # ==================================================
-# PROPEVAL OUTPUTS
+# PROPEVAL OUTPUT FOLDER
 # ==================================================
-pe1_dir = (
-    PROPEVAL_RUNS_DIR
-    / "NIST"
-)
+
+pe1_dir = PROPEVAL_RUNS_DIR / "NIST"
 
 # ---------------------------------------------------
 # PE1 Routing Config (NEW)

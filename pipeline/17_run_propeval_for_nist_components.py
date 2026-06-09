@@ -30,89 +30,67 @@ import subprocess
 import re
 from pathlib import Path
 from multiprocessing import Pool, cpu_count
-import time
-
-start = time.time()
-
 from pathlib import Path
 
-# ==================================================
-# CONFIGURATION
-# ==================================================
-RUN_YEAR = "2025"
-
-BASE_DIR = Path(r"D:\NIST_XML_Converter")
-
-# ==================================================
-# PREREQUISITE DIRECTORIES
-# ==================================================
-PREREQ_DIR = BASE_DIR / "prerequisites"
-
-TEMPLATES_DIR = (
-    PREREQ_DIR
-    / "templates"
-    / "LibraryCorr_NIST"
+from config import (
+    RUN_YEAR,
+    PROCESSED_DIR,
+    OUTPUT_DIR,
+    NIST_TXT_TEMPLATE,
+    NIST_SLB_TEMPLATE,
+    PROPEVAL_EXE,
+    ensure_directories
 )
 
-EXECUTABLES_DIR = (
-    PREREQ_DIR
-    / "executables"
-    / "FlashDriver"
-    / "S4MThermo"
-    / "Source"
-    / "vc17"
-    / "x64"
-    / "Release"
-)
+ensure_directories()
 
 # ==================================================
-# OUTPUT DIRECTORIES
+# OUTPUT DIRECTORIES (runtime)
 # ==================================================
-OUTPUT_DIR = BASE_DIR / "output" / RUN_YEAR
 
-PROCESSED_DIR = (
-    OUTPUT_DIR
-    / "processed"
-    / "full_library"
-)
+PROPEVAL_RUNS_DIR = OUTPUT_DIR / "propeval_runs"
+WORK_DIR = PROPEVAL_RUNS_DIR / "NIST"
 
-PROPEVAL_RUNS_DIR = (
-    OUTPUT_DIR
-    / "propeval_runs"
-)
-
-WORK_DIR = (
-    PROPEVAL_RUNS_DIR
-    / "NIST"
-)
-
-WORK_DIR.mkdir(
-    parents=True,
-    exist_ok=True
-)
+WORK_DIR.mkdir(parents=True, exist_ok=True)
 
 # ==================================================
-# INPUT / OUTPUT FILES
+# INPUT FILE
 # ==================================================
-CORE_EXCEL = (
-    PROCESSED_DIR
-    / f"12_NIST_Component_KeyThermoProperties_{RUN_YEAR}_TCPCAF_UPDATED.xlsx"
-)
 
-PROPEVAL_EXE = (
-    EXECUTABLES_DIR
-    / "PropEval.exe"
-)
+CORE_EXCEL = PROCESSED_DIR / f"12_NIST_Component_KeyThermoProperties_{RUN_YEAR}_TCPCAF_UPDATED.xlsx"
 
-TXT_TEMPLATE = (
-    TEMPLATES_DIR
-    / "{COMPONENT_NAME}_{TRCID}_NIST.txt"
-)
+# ==================================================
+# VALIDATION 
+# ==================================================
 
-SLB_TEMPLATE = (
-    TEMPLATES_DIR
-    / "{COMPONENT_NAME}_{TRCID}_NIST.slb"
-)
+if not CORE_EXCEL.exists():
+    raise FileNotFoundError(f"Missing input: {CORE_EXCEL}")
+
+if not PROPEVAL_EXE.exists():
+    raise FileNotFoundError(f"Missing executable: {PROPEVAL_EXE}")
+
+if not NIST_TXT_TEMPLATE.exists():
+    raise FileNotFoundError(f"Missing template: {NIST_TXT_TEMPLATE}")
+
+if not NIST_SLB_TEMPLATE.exists():
+    raise FileNotFoundError(f"Missing template: {NIST_SLB_TEMPLATE}")
+
+# ==================================================
+# TEMPLATE ASSIGNMENT
+# ==================================================
+
+TXT_TEMPLATE = NIST_TXT_TEMPLATE
+SLB_TEMPLATE = NIST_SLB_TEMPLATE
+
+# ==================================================
+# DEBUG (optional)
+# ==================================================
+
+print("Working directory:", WORK_DIR)
+print("Core Excel:", CORE_EXCEL)
+print("TXT Template:", TXT_TEMPLATE)
+print("SLB Template:", SLB_TEMPLATE)
+
 
 
 # ---------------------------------------------------
@@ -141,12 +119,9 @@ def process_component(row):
         comp_library = str(alias).strip()
         safe = make_safe_name(comp_library)
 
-        # slb = f"{WORK_DIR}\\{safe}_{trcid}_NIST.slb"
-        # txt = f"{WORK_DIR}\\{safe}_{trcid}_NIST.txt"
-        # pe1 = txt.replace(".txt", ".pe1")
-        slb = WORK_DIR / f"{safe}_{trcid}_NIST.slb"
-        txt = WORK_DIR / f"{safe}_{trcid}_NIST.txt"
-        pe1 = txt.with_suffix(".pe1")
+        slb = f"{WORK_DIR}\\{safe}_{trcid}_NIST.slb"
+        txt = f"{WORK_DIR}\\{safe}_{trcid}_NIST.txt"
+        pe1 = txt.replace(".txt", ".pe1")
 
         # Skip if already processed
         if Path(pe1).exists():
@@ -180,12 +155,11 @@ def process_component(row):
             txt
         )
 
-        # subprocess.run(
-        #     [PROPEVAL_EXE, slb, txt],
-        #     stdout=subprocess.DEVNULL,
-        #     stderr=subprocess.DEVNULL
-        # )
-        subprocess.run([str(PROPEVAL_EXE), str(slb), str(txt)], cwd=WORK_DIR, stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
+        subprocess.run(
+            [PROPEVAL_EXE, slb, txt],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL
+        )
 
         if not Path(pe1).exists():
             return ("FAILED", trcid)
@@ -220,13 +194,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-end = time.time()
-
-elapsed = end - start
-
-print(
-    f"\nTotal runtime: "
-    f"{elapsed:.2f} sec "
-    f"({elapsed/60:.2f} min)"
-)

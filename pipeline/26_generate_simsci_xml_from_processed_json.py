@@ -24,7 +24,7 @@ Input:
 Output:
     SimSci-compatible XML component files
 """
-
+INVALID_CAS = []
 
 import os
 import json
@@ -39,70 +39,69 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(
 
 from pathlib import Path
 
-# ==================================================
-# CONFIGURATION
-# ==================================================
-RUN_YEAR = "2025"
+from config import (
+    RUN_YEAR,
+    PREREQ_DIR,
+    PROCESSED_DIR,
+    XML_DIR,
+    XML_LIBRARY_DIR,
+    ensure_directories
+)
 
-BASE_DIR = Path(r"D:\NIST_XML_Converter")
+ensure_directories()
+
+# ==================================================
+# CONSTANTS
+# ==================================================
 
 REF_CODE_DEFAULT = "11005"
 
 # ==================================================
 # PREREQUISITES
 # ==================================================
-PREREQ_DIR = (
-    BASE_DIR
-    / "prerequisites"
-)
 
 EXCEL_INPUT_DIR = PREREQ_DIR / "excel_inputs"
 
-CONFIG_FILE = (
-    EXCEL_INPUT_DIR
-    / "6_NIST_Property_Mappings_Template.xlsx"
-)
+CONFIG_FILE = EXCEL_INPUT_DIR / "6_NIST_Property_Mappings_Template.xlsx"
 
 # ==================================================
-# OUTPUT DIRECTORIES
+# INPUT DIRECTORIES
 # ==================================================
-OUTPUT_DIR = (
-    BASE_DIR
-    / "output"
-    / RUN_YEAR
-)
 
-PROCESSED_DIR_BASE = (
-    OUTPUT_DIR
-    / "processed"
-    / "full_library"
-)
+MASTER_DIR = PROCESSED_DIR / "1_components_Inmaster_withsimsciid_fillin_alias_updated"
 
-XML_OUTPUT_BASE = (
-    OUTPUT_DIR
-    / "xml"
-)
+ASSIGNED_DIR = PROCESSED_DIR / "3_components_notInmaster_assignedsimsciid_fillin"
 
-PROCESSED_DIR = (
-    PROCESSED_DIR_BASE
-    / "1_components_Inmaster_withsimsciid_fillin_alias_updated"
-)
+# ==================================================
+# OUTPUT DIRECTORY
+# ==================================================
 
-PROCESSED_DIR1 = (
-    PROCESSED_DIR_BASE
-    / "3_components_notInmaster_assignedsimsciid_fillin"
-)
+XML_OUTPUT_DIR = XML_LIBRARY_DIR / "01_generated"
 
-XML_OUTPUT_DIR = (
-    XML_OUTPUT_BASE
-    / "Libraryfiles_NIST"
-    / "01_generated"
-)
+#  Create only required output folder
+XML_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-XML_OUTPUT_DIR.mkdir(
-    parents=True,
-    exist_ok=True
-)
+# ==================================================
+# VALIDATION 
+# ==================================================
+
+if not CONFIG_FILE.exists():
+    raise FileNotFoundError(f"Missing input: {CONFIG_FILE}")
+
+if not MASTER_DIR.exists():
+    raise FileNotFoundError(f"Missing folder: {MASTER_DIR}")
+
+if not ASSIGNED_DIR.exists():
+    raise FileNotFoundError(f"Missing folder: {ASSIGNED_DIR}")
+
+# ==================================================
+# DEBUG (optional)
+# ==================================================
+
+print("Config file:", CONFIG_FILE)
+print("Master dir:", MASTER_DIR)
+print("Assigned dir:", ASSIGNED_DIR)
+print("XML output dir:", XML_OUTPUT_DIR)
 
 # -------------------------
 # Utility: CAS normalization
@@ -132,7 +131,17 @@ def normalize_cas(cas):
     if re.match(r'^\d{1,7}-\d{2}-\d$', formatted):
         return formatted
     return None
+def validate_cas_checksum(cas):
 
+    if not cas: return False
+
+    digits = str(cas).replace("-", "")
+
+    check_digit = int(digits[-1])
+
+    total = sum((i+1)*int(d) for i,d in enumerate(digits[:-1][::-1]))
+
+    return total % 10 == check_digit
 def is_valid_cas(cas):
     if not cas or not isinstance(cas, str):
         return False
@@ -266,6 +275,7 @@ def resolve_equation(model, prop_name, equation_from_json, model_eq_map, tempdep
 # -------------------------
 # Core: build XML per component (UPDATED)
 # -------------------------
+
 def build_xml(json_data, uom_map, tempdep_config, model_eq_map, filename):
     comp = ET.Element("comp")
 
@@ -285,6 +295,32 @@ def build_xml(json_data, uom_map, tempdep_config, model_eq_map, filename):
     sim_id = str(json_data.get("SIMSCIID", "") or "")
     raw_cas = json_data.get("CASNO", "") or json_data.get("CAS", "")
     formatted_cas = normalize_cas(raw_cas)
+    # if formatted_cas and not validate_cas_checksum(formatted_cas): logging.warning(f"{filename}: INVALID CAS {formatted_cas}"); formatted_cas=""
+    if formatted_cas and not validate_cas_checksum(formatted_cas):
+
+        INVALID_CAS.append({
+
+            "File": filename,
+
+            "Component": name,
+
+            "SIMSCIID": sim_id,
+
+            "CASNO": formatted_cas,
+
+            "TRCID": trcid
+
+        })
+
+        logging.warning(
+
+            f"{filename}: INVALID CAS {formatted_cas}"
+
+        )
+
+
+
+
     if formatted_cas is None:
         logging.warning(f"{filename}: CAS '{raw_cas}' could not be normalized.")
         formatted_cas = str(raw_cas)
@@ -543,14 +579,41 @@ def convert_all_json_to_xml(PROCESSEDDIR):
 # Main execution
 # -------------------------
 if __name__ == "__main__":
-    if PROCESSED_DIR.exists():
-        convert_all_json_to_xml(PROCESSED_DIR)
+    if MASTER_DIR.exists():
+        convert_all_json_to_xml(MASTER_DIR)
     else:
-        logging.warning(f"Processed dir not found: {PROCESSED_DIR}")
+        logging.warning(f"Processed dir not found: {MASTER_DIR}")
 
-    if PROCESSED_DIR1.exists():
-        convert_all_json_to_xml(PROCESSED_DIR1)
+    if ASSIGNED_DIR.exists():
+        convert_all_json_to_xml(ASSIGNED_DIR)
     else:
-        logging.warning(f"Processed dir not found: {PROCESSED_DIR1}")
+        logging.warning(f"Processed dir not found: {ASSIGNED_DIR}")
+    
+    if INVALID_CAS:
+
+        invalid_df = pd.DataFrame(
+            INVALID_CAS
+        )
+
+        invalid_file = (
+            XML_OUTPUT_DIR
+            / "Invalid_CAS.csv"
+        )
+
+        invalid_df.to_csv(
+
+            invalid_file,
+
+            index=False
+
+        )
+
+        print(
+
+            f"\nInvalid CAS saved: "
+
+            f"{invalid_file}"
+
+        )
 
     logging.info("XML generation completed.")

@@ -30,63 +30,58 @@ import pandas as pd
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
-# ==================================================
-# CONFIGURATION
-# ==================================================
-RUN_YEAR = "2025"
 
-BASE_DIR = Path(r"D:\NIST_XML_Converter")
-
-# ==================================================
-# OUTPUT DIRECTORIES
-# ==================================================
-OUTPUT_DIR = (
-    BASE_DIR
-    / "output"
-    / RUN_YEAR
+from config import (
+    RUN_YEAR,
+    OUTPUT_DIR,
+    PROCESSED_DIR,
+    XML_DIR,
+    XML_LIBRARY_DIR,
+    ensure_directories
 )
 
-PROCESSED_DIR = (
-    OUTPUT_DIR
-    / "processed"
-    / "full_library"
-)
+import pandas as pd
 
-XML_BASE_DIR = (
-    OUTPUT_DIR
-    / "xml"
-)
+ensure_directories()
 
 # ==================================================
-# INPUT FILES
+# INPUT FILE
 # ==================================================
-INPUT_EXCEL = (
-    PROCESSED_DIR
-    / f"11_Missing_Fillin_Properties_{RUN_YEAR}.xlsx"
-)
+
+INPUT_EXCEL = PROCESSED_DIR / f"11_Missing_Fillin_Properties_{RUN_YEAR}.xlsx"
 
 # ==================================================
-# XML INPUT / OUTPUT
+# XML DIRECTORIES
 # ==================================================
-XML_DIR = (
-    XML_BASE_DIR
-    / "Libraryfiles_NIST"
-    / "01_generated"
-)
 
-OUTPUT_XML_DIR = (
-    XML_BASE_DIR
-    / "Libraryfiles_NIST"
-    / "02_missingprop_refcode9999"
-)
+# Use XML base from config
+XML_INPUT_DIR = XML_LIBRARY_DIR / "01_generated"
 
-OUTPUT_XML_DIR.mkdir(
-    parents=True,
-    exist_ok=True
-)
+OUTPUT_XML_DIR = XML_LIBRARY_DIR / "02_missingprop_refcode9999"
 
-# ---------------- LOAD EXCEL ----------------
+# Create only new output folder
+OUTPUT_XML_DIR.mkdir(parents=True, exist_ok=True)
+
+# ==================================================
+# VALIDATION 
+# ==================================================
+
+if not INPUT_EXCEL.exists():
+    raise FileNotFoundError(f"Missing input: {INPUT_EXCEL}")
+
+if not XML_INPUT_DIR.exists():
+    raise FileNotFoundError(f"Missing XML directory: {XML_INPUT_DIR}")
+
+# ==================================================
+# LOAD EXCEL
+# ==================================================
+
 df = pd.read_excel(INPUT_EXCEL)
+
+# Optional debug
+print("Loaded rows:", len(df))
+print("XML input dir:", XML_INPUT_DIR)
+print("Output XML dir:", OUTPUT_XML_DIR)
 
 # Convert to dictionary using trcid
 excel_dict = {str(r["trcid"]): r for _, r in df.iterrows()}
@@ -102,7 +97,7 @@ PROPERTIES = [
 # ---------------- PROCESS XML ----------------
 processed = 0
 
-for xml_path in XML_DIR.glob("*.xml"):
+for xml_path in XML_INPUT_DIR.glob("*.xml"):
 
     alias = xml_path.stem.replace("Comp-NIST-", "")  # NST5523
     trcid = alias.replace("NST", "")                 # 5523

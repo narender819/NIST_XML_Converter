@@ -33,29 +33,27 @@ import json
 import pandas as pd
 import re
 
-# ==================================================
-# CONFIGURATION
-# ==================================================
-RUN_YEAR = "2025"
+from config import (
+    RUN_YEAR,
+    OUTPUT_DIR,
+    PROCESSED_DIR,
+    ensure_directories
+)
 
-BASE_DIR = Path(r"D:\NIST_XML_Converter")
-
-# ==================================================
-# OUTPUT DIRECTORIES
-# ==================================================
-OUTPUT_DIR = BASE_DIR / "output" / RUN_YEAR
-
-PROCESSED_DIR = OUTPUT_DIR / "processed" / "full_library"
+ensure_directories()
 
 # ==================================================
 # INPUT / OUTPUT FILES
 # ==================================================
+
 JSON_FOLDER = OUTPUT_DIR / "json"
 
-OUTPUT_FILE = (
-    PROCESSED_DIR
-    / "4_DIPPR_Family_Extraction_All_json.xlsx"
-)
+json_files = list(JSON_FOLDER.glob("*.json"))
+
+if not json_files:
+    print(f"Warning: No JSON files found in {JSON_FOLDER}")
+
+OUTPUT_FILE = PROCESSED_DIR / "4_DIPPR_Family_Extraction_All_json.xlsx"
 
 
 def extract_cas_from_filename(filename):

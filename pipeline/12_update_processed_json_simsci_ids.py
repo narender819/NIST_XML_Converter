@@ -29,23 +29,20 @@ import pandas as pd
 
 from pathlib import Path
 
-# ==================================================
-# CONFIGURATION
-# ==================================================
-RUN_YEAR = "2025"
+from config import (
+    RUN_YEAR,
+    PROCESSED_DIR,
+    ensure_directories
+)
 
-BASE_DIR = Path(r"D:\NIST_XML_Converter")
+from pathlib import Path
 
-# ==================================================
-# OUTPUT DIRECTORIES
-# ==================================================
-OUTPUT_DIR = BASE_DIR / "output" / RUN_YEAR
-
-PROCESSED_DIR = OUTPUT_DIR / "processed" / "full_library"
+ensure_directories()
 
 # ==================================================
 # INPUT / OUTPUT FILES
 # ==================================================
+
 excel_file = (
     PROCESSED_DIR
     / "9_DIPPR_Family_Extraction_All_With_Smiles_none_Predicted_Family_SIMSCI_ASSIGNED.xlsx"
@@ -61,10 +58,19 @@ json_output_folder = (
     / "3_components_notInmaster_assignedsimsciid"
 )
 
-json_output_folder.mkdir(
-    parents=True,
-    exist_ok=True
-)
+# Create only script-specific folder
+json_output_folder.mkdir(parents=True, exist_ok=True)
+
+# ==================================================
+# INPUT VALIDATION
+# ==================================================
+
+if not excel_file.exists():
+    raise FileNotFoundError(f"Missing required input: {excel_file}")
+
+if not json_input_folder.exists():
+    raise FileNotFoundError(f"Missing required input: {json_input_folder}")
+
 
 
 # ==============================

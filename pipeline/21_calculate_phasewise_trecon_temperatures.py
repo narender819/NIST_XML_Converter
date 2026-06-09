@@ -30,39 +30,17 @@ import pandas as pd
 
 from openpyxl import load_workbook
 
-def auto_adjust_column_widths(excel_path, max_width=40, padding=2):
-    wb = load_workbook(excel_path)
-
-    for ws in wb.worksheets:
-        for column_cells in ws.columns:
-            max_len = 0
-            col_letter = column_cells[0].column_letter
-
-            for cell in column_cells:
-                if cell.value is not None:
-                    max_len = max(max_len, len(str(cell.value)))
-
-            adjusted = min(max_len + padding, max_width)
-            ws.column_dimensions[col_letter].width = adjusted
-
-    wb.save(excel_path)
+from utils import auto_adjust_column_widths
 
 from pathlib import Path
 
-# ==================================================
-# CONFIGURATION
-# ==================================================
-RUN_YEAR = "2025"
-
-BASE_DIR = Path(r"D:\NIST_XML_Converter")
-
-OUTPUT_DIR = BASE_DIR / "output" / RUN_YEAR
-
-PROCESSED_DIR = (
-    OUTPUT_DIR
-    / "processed"
-    / "full_library"
+from config import (
+    RUN_YEAR,
+    PROCESSED_DIR,
+    ensure_directories
 )
+
+ensure_directories()
 
 NEG_TOL = 1.0  # K
 
@@ -162,15 +140,18 @@ def compute_trecon(
 
 
 def main():
-    EXCEL_PATH = (
-        PROCESSED_DIR
-        / f"15_NIST_Phasewise_With_SIMSCI_Metadata.xlsx"
-    )
+    EXCEL_PATH = PROCESSED_DIR / f"15_NIST_Phasewise_With_SIMSCI_Metadata.xlsx"
 
-    OUTPUT_PATH = (
-        PROCESSED_DIR
-        / f"16_NIST_With_SIMSCI_Trecon.xlsx"
-    )
+    OUTPUT_PATH = PROCESSED_DIR / f"16_NIST_With_SIMSCI_Trecon.xlsx"
+
+    #  Validation (recommended)
+    if not EXCEL_PATH.exists():
+        raise FileNotFoundError(f"Missing input: {EXCEL_PATH}")
+
+    print("Input:", EXCEL_PATH)
+    print("Output:", OUTPUT_PATH)
+
+    # your processing logic continues here...
 
     sheets = pd.read_excel(EXCEL_PATH, sheet_name=None)
 

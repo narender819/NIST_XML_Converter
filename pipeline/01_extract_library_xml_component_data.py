@@ -20,23 +20,26 @@ import xml.etree.ElementTree as ET
 import pandas as pd
 
 from pathlib import Path
+from config import ensure_directories
 
-ROOT_DIR = Path(r"D:\NIST_XML_Converter")
+ensure_directories()
 
-PREREQ_DIR = ROOT_DIR / "prerequisites"
 
-LIBRARIES_DIR = PREREQ_DIR / "libraries"
 
-OUTPUT_2025_DIR = ROOT_DIR / "output" / "2025"
-
-PROCESSED_DIR = OUTPUT_2025_DIR / "processed" / "full_library"
-
-XML_OUTPUT_DIR = OUTPUT_2025_DIR / "xml"
-
+from config import (
+    BASE_DIR,
+    PREREQ_DIR,
+    PROCESSED_DIR,
+    XML_DIR,
+    LIBRARY_DIR,
+    RUN_YEAR
+)
 
 # ---------------- CONFIG ----------------
-BASE_PATH = LIBRARIES_DIR / "SIMSCI" / "Libraries_xmlfiles_2025"
-OUTPUT_EXCEL = PROCESSED_DIR / "1_Libraries_XML_Component_Extract_nodipprsponsor.xlsx"
+
+BASE_PATH = PREREQ_DIR / "libraries" / "SIMSCI" / f"Libraries_xmlfiles_{RUN_YEAR}"
+
+OUTPUT_EXCEL = PROCESSED_DIR / f"1_Libraries_XML_Component_Extract_nodipprsponsor.xlsx"
 
 
 

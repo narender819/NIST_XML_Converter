@@ -26,6 +26,34 @@ import pandas as pd
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
+
+
+from config import (
+    RUN_YEAR,
+    PROCESSED_DIR,
+    XML_DIR,
+    XML_LIBRARY_DIR,
+    ensure_directories
+)
+
+ensure_directories()
+
+# ==================================================
+# XML OUTPUT DIRECTORY (script-specific)
+# ==================================================
+
+XML_OUTPUT_DIR = XML_LIBRARY_DIR / "01_generated"
+
+# ==================================================
+# OUTPUT FILE
+# ==================================================
+
+OUTPUT_EXCEL = PROCESSED_DIR / f"19_NIST_SIMSCI_SCP_Key.xlsx"
+
+MAX_COEFFS = 8
+
+rows = []
+
 def normalize_cas(cas):
     """
     Normalize CAS to digit-only string: '71-43-2' or '71432' → '71432'
@@ -40,57 +68,10 @@ def normalize_cas(cas):
     s = "".join(ch for ch in s if ch.isdigit())
     return s if s else None
 
-from pathlib import Path
-
-# ==================================================
-# CONFIGURATION
-# ==================================================
-RUN_YEAR = "2025"
-
-BASE_DIR = Path(r"D:\NIST_XML_Converter")
-
-# ==================================================
-# OUTPUT DIRECTORIES
-# ==================================================
-OUTPUT_DIR = (
-    BASE_DIR
-    / "output"
-    / RUN_YEAR
-)
-
-PROCESSED_DIR = (
-    OUTPUT_DIR
-    / "processed"
-    / "full_library"
-)
-
-XML_DIR = (
-    OUTPUT_DIR
-    / "xml"
-    / "Libraryfiles_NIST"
-    / "01_generated"
-)
-
-# ==================================================
-# INPUT / OUTPUT FILES
-# ==================================================
-OUTPUT_EXCEL = (
-    PROCESSED_DIR
-    / f"19_NIST_SIMSCI_SCP_Key.xlsx"
-)
-
-PROCESSED_DIR.mkdir(
-    parents=True,
-    exist_ok=True
-)
-MAX_COEFFS = 8
-
-rows = []
-
 # ---------------------------------------------------
 # LOOP XML FILES
 # ---------------------------------------------------
-for xml_file in XML_DIR.glob("*.xml"):
+for xml_file in XML_OUTPUT_DIR.glob("*.xml"):
     try:
         tree = ET.parse(xml_file)
         root = tree.getroot()

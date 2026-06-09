@@ -27,46 +27,41 @@ import pandas as pd
 import os
 from pathlib import Path
 
-# ==================================================
-# CONFIGURATION
-# ==================================================
-RUN_YEAR = "2025"
+from config import (
+    RUN_YEAR,
+    PREREQ_DIR,
+    PROCESSED_DIR,
+    OUTPUT_DIR,
+    ensure_directories
+)
 
-BASE_DIR = Path(r"D:\NIST_XML_Converter")
+ensure_directories()
 
 # ==================================================
-# PREREQUISITE DIRECTORIES
+# PREREQUISITE DIRECTORIES (derived locally)
 # ==================================================
-PREREQ_DIR = BASE_DIR / "prerequisites"
 
 EXCEL_INPUT_DIR = PREREQ_DIR / "excel_inputs"
-
-# ==================================================
-# OUTPUT DIRECTORIES
-# ==================================================
-OUTPUT_DIR = BASE_DIR / "output" / RUN_YEAR
-
-PROCESSED_DIR = OUTPUT_DIR / "processed" / "full_library"
 
 SMILES_DIR = OUTPUT_DIR / "smiles"
 
 # ==================================================
 # INPUT / OUTPUT FILES
 # ==================================================
-DIPPR_FILE = (
-    PROCESSED_DIR
-    / "6_DIPPR_Family_Group_Assigned.xlsx"
-)
 
-SMILES_FILE = (
-    SMILES_DIR
-    / f"2_compounds_smiles_{RUN_YEAR}_removedblanks.xlsx"
-)
+DIPPR_FILE = PROCESSED_DIR / "6_DIPPR_Family_Group_Assigned.xlsx"
 
-OUTPUT_FILE = (
-    PROCESSED_DIR
-    / "7_DIPPR_Family_Extraction_All_With_Smiles.xlsx"
-)
+SMILES_FILE = SMILES_DIR / f"2_compounds_smiles_{RUN_YEAR}_removedblanks.xlsx"
+
+if not DIPPR_FILE.exists():
+    raise FileNotFoundError(f"Missing input: {DIPPR_FILE}")
+
+if not SMILES_FILE.exists():
+    raise FileNotFoundError(f"Missing input: {SMILES_FILE}")
+
+OUTPUT_FILE = PROCESSED_DIR / "7_DIPPR_Family_Extraction_All_With_Smiles.xlsx"
+
+
 
 
 def load_excel_file(path, description):

@@ -30,37 +30,41 @@ import numpy as np
 import re
 
 
+from config import (
+    RUN_YEAR,
+    PROCESSED_DIR,
+    ensure_directories
+)
+
+ensure_directories()
+
+# ==================================================
+# CONSTANTS
+# ==================================================
+
 SENTINEL = -9999
-# ==================================================
-# CONFIGURATION
-# ==================================================
-RUN_YEAR = "2025"
-
-BASE_DIR = Path(r"D:\NIST_XML_Converter")
 
 # ==================================================
-# OUTPUT DIRECTORIES
+# INPUT FOLDERS
 # ==================================================
-OUTPUT_DIR = BASE_DIR / "output" / RUN_YEAR
 
-PROCESSED_DIR = (OUTPUT_DIR/ "processed" / "full_library")
+COMPONENTS_MASTER_DIR = PROCESSED_DIR / "1_components_Inmaster_withsimsciid"
+COMPONENTS_ASSIGNED_DIR = PROCESSED_DIR / "3_components_notInmaster_assignedsimsciid"
 
-# ==================================================
-# INPUT / OUTPUT PATHS
-# ==================================================
+#  Ensure these exist (important here)
+COMPONENTS_MASTER_DIR.mkdir(parents=True, exist_ok=True)
+COMPONENTS_ASSIGNED_DIR.mkdir(parents=True, exist_ok=True)
+
 folders = [
-
-    PROCESSED_DIR
-    / "1_components_Inmaster_withsimsciid",
-
-    PROCESSED_DIR
-    / "3_components_notInmaster_assignedsimsciid"
+    COMPONENTS_MASTER_DIR,
+    COMPONENTS_ASSIGNED_DIR
 ]
 
-output_excel = (
-    PROCESSED_DIR
-    / f"10_NIST_Component_KeyThermoProperties_{RUN_YEAR}.xlsx"
-)
+# ==================================================
+# OUTPUT FILE
+# ==================================================
+
+output_excel = PROCESSED_DIR / f"10_NIST_Component_KeyThermoProperties_{RUN_YEAR}.xlsx"
 
 rows = []
 

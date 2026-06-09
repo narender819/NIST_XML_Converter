@@ -31,56 +31,27 @@ import re
 from openpyxl import load_workbook
 
 
-# ==================================================
-# CONFIGURATION
-# ==================================================
-RUN_YEAR = "2025"
-
-BASE_DIR = Path(r"D:\NIST_XML_Converter")
-
-# ==================================================
-# PREREQUISITES
-# ==================================================
-PREREQ_DIR = (
-    BASE_DIR
-    / "prerequisites"
+from config import (
+    RUN_YEAR,
+    PREREQ_DIR,
+    PROCESSED_DIR,
+    LIBRARIES_INPUT_DIR,
+    ensure_directories
 )
 
-LIBRARIES_INPUT_DIR = PREREQ_DIR / "libraries"
-
-SIMSCI_XML_ROOT = (
-    LIBRARIES_INPUT_DIR
-     / "SIMSCI"  
-    / "Libraries_xmlfiles_2025"
-)
+ensure_directories()
 
 # ==================================================
-# OUTPUT DIRECTORIES
+# PREREQUISITES (derived)
 # ==================================================
-OUTPUT_DIR = (
-    BASE_DIR
-    / "output"
-    / RUN_YEAR
-)
 
-PROCESSED_DIR = (
-    OUTPUT_DIR
-    / "processed"
-    / "full_library"
-)
+SIMSCI_XML_ROOT = LIBRARIES_INPUT_DIR / "SIMSCI" / "Libraries_xmlfiles_2025"
 
 # ==================================================
-# INPUT / OUTPUT FILES
+# OUTPUT FILE
 # ==================================================
-OUTPUT_EXCEL = (
-    PROCESSED_DIR
-    / f"19_NIST_SIMSCI_SCP_Key.xlsx"
-)
 
-PROCESSED_DIR.mkdir(
-    parents=True,
-    exist_ok=True
-)
+OUTPUT_EXCEL = PROCESSED_DIR / f"19_NIST_SIMSCI_SCP_Key.xlsx"
 
 # =========================================================
 # LIBRARY PRIORITY

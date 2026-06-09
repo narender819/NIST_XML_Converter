@@ -34,62 +34,50 @@ import pandas as pd
 from pathlib import Path
 
 from pathlib import Path
+from config import (
+    RUN_YEAR,
+    PREREQ_DIR,
+    PROCESSED_DIR,
+    ensure_directories
+)
 
-# ==================================================
-# CONFIGURATION
-# ==================================================
-RUN_YEAR = "2025"
-
-BASE_DIR = Path(r"D:\NIST_XML_Converter")
+ensure_directories()
 
 # ==================================================
 # PREREQUISITES
 # ==================================================
-PREREQ_DIR = (
-    BASE_DIR
-    / "prerequisites"
-)
 
 EXCEL_INPUT_DIR = PREREQ_DIR / "excel_inputs"
 
-MASTER_FILE = (
-    EXCEL_INPUT_DIR
-    / "5_Master_Component_List.xlsx"
-)
+MASTER_FILE = EXCEL_INPUT_DIR / "5_Master_Component_List.xlsx"
+
 # ==================================================
-# OUTPUT DIRECTORIES
+# INPUT / OUTPUT DIRECTORIES
 # ==================================================
-OUTPUT_DIR_BASE = (
-    BASE_DIR
-    / "output"
-    / RUN_YEAR
-)
 
-PROCESSED_DIR = (
-    OUTPUT_DIR_BASE
-    / "processed"
-    / "full_library"
-)
+JSON_INPUT_DIR = PROCESSED_DIR / "1_components_Inmaster_withsimsciid_fillin"
 
-JSON_INPUT_DIR = (
-    PROCESSED_DIR
-    / "1_components_Inmaster_withsimsciid_fillin"
-)
+OUTPUT_DIR = PROCESSED_DIR / "1_components_Inmaster_withsimsciid_fillin_alias_updated"
 
-OUTPUT_DIR = (
-    PROCESSED_DIR
-    / "1_components_Inmaster_withsimsciid_fillin_alias_updated"
-)
+#  Create only new output subfolder
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-OUTPUT_DIR.mkdir(
-    parents=True,
-    exist_ok=True
-)
+# ==================================================
+# OUTPUT FILE
+# ==================================================
 
-REPORT_PATH = (
-    OUTPUT_DIR
-    / "25_alias_assignment_report.xlsx"
-)
+REPORT_PATH = OUTPUT_DIR / "25_alias_assignment_report.xlsx"
+
+# ==================================================
+# VALIDATION 
+# ==================================================
+
+if not MASTER_FILE.exists():
+    raise FileNotFoundError(f"Missing input: {MASTER_FILE}")
+
+if not JSON_INPUT_DIR.exists():
+    raise FileNotFoundError(f"Missing folder: {JSON_INPUT_DIR}")
+
 
 # ---------------- HELPER ----------------
 def normalize_cas(cas):

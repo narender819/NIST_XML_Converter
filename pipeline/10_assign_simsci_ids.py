@@ -30,67 +30,34 @@ from collections import defaultdict
 from openpyxl import load_workbook
 from pathlib import Path
 
-def auto_adjust_column_widths(excel_path, max_width=40, padding=2):
-    wb = load_workbook(excel_path)
+from utils import auto_adjust_column_widths
+from config import (
+    RUN_YEAR,
+    PREREQ_DIR,
+    PROCESSED_DIR,
+    ensure_directories
+)
 
-    for ws in wb.worksheets:
-        for column_cells in ws.columns:
-            max_len = 0
-            col_letter = column_cells[0].column_letter
-
-            for cell in column_cells:
-                if cell.value is not None:
-                    max_len = max(max_len, len(str(cell.value)))
-
-            adjusted = min(max_len + padding, max_width)
-            ws.column_dimensions[col_letter].width = adjusted
-
-    wb.save(excel_path)
-
+ensure_directories()
 
 # ==================================================
-# CONFIGURATION
+# PREREQUISITE DIRECTORIES (derived locally)
 # ==================================================
-RUN_YEAR = "2025"
-
-BASE_DIR = Path(r"D:\NIST_XML_Converter")
-
-# ==================================================
-# PREREQUISITE DIRECTORIES
-# ==================================================
-PREREQ_DIR = BASE_DIR / "prerequisites"
 
 EXCEL_INPUT_DIR = PREREQ_DIR / "excel_inputs"
 
 # ==================================================
-# OUTPUT DIRECTORIES
-# ==================================================
-OUTPUT_DIR = BASE_DIR / "output" / RUN_YEAR
-
-PROCESSED_DIR = OUTPUT_DIR / "processed" / "full_library"
-
-# ==================================================
 # INPUT / OUTPUT FILES
 # ==================================================
-TARGET_FILE = (
-    PROCESSED_DIR
-    / "8_DIPPR_Family_Extraction_All_With_Smiles_none_Predicted_Family.xlsx"
-)
 
-MASTER_FILE = (
-    EXCEL_INPUT_DIR
-    / "5_Master_Component_List.xlsx"
-)
+TARGET_FILE = PROCESSED_DIR / "8_DIPPR_Family_Extraction_All_With_Smiles_none_Predicted_Family.xlsx"
 
-LIBRARY_FILE = (
-    PROCESSED_DIR
-    / "2_Libraries_XML_Component_Extract.xlsx"
-)
+MASTER_FILE = EXCEL_INPUT_DIR / "5_Master_Component_List.xlsx"
 
-OUTPUT_FILE = (
-    PROCESSED_DIR
-    / "9_DIPPR_Family_Extraction_All_With_Smiles_none_Predicted_Family_SIMSCI_ASSIGNED.xlsx"
-)
+LIBRARY_FILE = PROCESSED_DIR / "2_Libraries_XML_Component_Extract.xlsx"
+
+OUTPUT_FILE = PROCESSED_DIR / "9_DIPPR_Family_Extraction_All_With_Smiles_none_Predicted_Family_SIMSCI_ASSIGNED.xlsx"
+
 # ======================================================
 # COLUMN DEFINITIONS
 # ======================================================

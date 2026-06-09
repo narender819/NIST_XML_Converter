@@ -1,14 +1,25 @@
 import subprocess
 import sys
-import os
 import time
 from pathlib import Path
 
-def run_script(script_name):
-    print(f"Running {script_name}...")
+STATE_FILE = Path("pipeline_state.txt")
 
+
+def save_progress(script_name):
+    STATE_FILE.write_text(script_name)
+
+
+def load_progress():
+    if STATE_FILE.exists():
+        return STATE_FILE.read_text().strip()
+    return None
+
+
+def run_script(script_path):
+    print(f"Running {script_path.name}...")
     result = subprocess.run(
-        [sys.executable, script_name],
+        [sys.executable, str(script_path)],
         capture_output=True,
         text=True
     )
@@ -16,12 +27,11 @@ def run_script(script_name):
     print(result.stdout)
 
     if result.returncode != 0:
-        print(f"Error running {script_name}:")
+        print(f"Error in {script_path.name}:")
         print(result.stderr)
         return False
 
     return True
-
 
 def main():
 
@@ -73,7 +83,7 @@ def main():
         # # ==================================================
         # # XML GENERATION
         # # ==================================================
-        "26_generate_simsci_xml_from_processed_json.py",
+        # "26_generate_simsci_xml_from_processed_json.py",
         # # ==================================================
         # # SCP PROCESSING
         # # ==================================================
@@ -89,41 +99,47 @@ def main():
         # # ==================================================s
         # # XML FINALIZATION
         # # ==================================================
-        "33_update_xml_missing_property_refcodes.py",
-        "34_update_xml_enthalpy_integrated_constants.py",
-        "35_clear_duplicate_casnum_from_xml.py",
+        # "33_update_xml_missing_property_refcodes.py",
+        # "34_update_xml_enthalpy_integrated_constants.py",
+        # "35_clear_duplicate_casnum_from_xml.py",
         # "36_process_blacklisted_component_xmls.py",
         # # ==================================================
         # # FINAL LIBRARY BUILD
         # # ==================================================
-        # "37_generate_master_library_lb1_lb2_files.py", 
+        "37_generate_master_library_lb1_lb2_files.py", 
         ]
 
-    # ==================================================
-    # PIPELINE DIRECTORY
-    # ==================================================
-    BASE_DIR = Path(r"D:\NIST_XML_Converter\pipeline")
+    BASE_DIR = Path(__file__).resolve().parent
 
-    # ==================================================
-    # EXECUTE PIPELINE
-    # ==================================================
+    last_completed = load_progress()
+
+    resume_mode = last_completed is not None
+    skip = True if resume_mode else False
+
     for script in scripts:
+
+        if resume_mode and skip:
+            if script == last_completed:
+                skip = False
+            continue
 
         script_path = BASE_DIR / script
 
-        success = run_script(str(script_path))
+        success = run_script(script_path)
 
         if not success:
-            print("Stopping pipeline due to error.")
+            print(f"Pipeline failed at {script}")
             break
 
-        else:
-            print(f"Finished {script}. Waiting before next script...\n")
+        save_progress(script)
 
-            time.sleep(4)
+        print(f"Finished {script}\n")
+        time.sleep(2)
 
     else:
-        print("All scripts executed successfully.")
+        print("All scripts completed successfully.")
+        if STATE_FILE.exists():
+            STATE_FILE.unlink()  # reset after full success
 
 
 if __name__ == "__main__":

@@ -35,17 +35,20 @@ from openpyxl import Workbook
 from pathlib import Path
 
 
-# ==================================================
-# CONSTANTS
-# ==================================================
-YEAR = "2025"
+from config import (
+    RUN_YEAR,
+    BASE_DIR,
+    OUTPUT_DIR,
+    ensure_directories
+)
 
-BASE_DIR = Path(r"D:\NIST_XML_Converter")
+ensure_directories()
 
 # ==================================================
 # DATABASES
 # ==================================================
-DB_DIR = BASE_DIR / "db"/ YEAR
+
+DB_DIR = BASE_DIR / "db" / RUN_YEAR
 
 DB_PATH = DB_DIR / "Pure.models.sqlite"
 DB_PATH_SMILES = DB_DIR / "Compounds.sqlite"
@@ -53,21 +56,19 @@ DB_PATH_SMILES = DB_DIR / "Compounds.sqlite"
 # ==================================================
 # OUTPUT DIRECTORIES
 # ==================================================
-OUTPUT_DIR = BASE_DIR / "output" / YEAR
-JSON_OUTPUT_DIR = OUTPUT_DIR / "json"
 
+JSON_OUTPUT_DIR = OUTPUT_DIR / "json"
 SMILES_OUTPUT_DIR = OUTPUT_DIR / "smiles"
 
 # ==================================================
 # OUTPUT FILES
 # ==================================================
+
 UNMATCHED_FILE = OUTPUT_DIR / "unmatched_components.xlsx"
 
-OUTPUT_FILE_SMILES = (
-    SMILES_OUTPUT_DIR / f"1_compounds_smiles_{YEAR}.xlsx"
-)
+OUTPUT_FILE_SMILES = SMILES_OUTPUT_DIR / f"1_compounds_smiles_{RUN_YEAR}.xlsx"
 
-# Ensure output folder exists
+# # Ensure output folder exists
 os.makedirs(JSON_OUTPUT_DIR, exist_ok=True)
 os.makedirs(SMILES_OUTPUT_DIR, exist_ok=True)
 
@@ -77,11 +78,12 @@ def extract_and_log():
     cursor = conn.cursor()
 
     # query = "SELECT TRCID, CASRN, JSON FROM PURE ORDER BY TRCID ASC LIMIT 5495,400"
-    query = "SELECT TRCID, CASRN, JSON FROM PURE ORDER BY TRCID ASC"
-    # query = "SELECT TRCID, CASRN, JSON FROM PURE WHERE TRCID IN (1143, 5523, 5822,5777, 5791)"
-    
+    # query = "SELECT TRCID, CASRN, JSON FROM PURE WHERE TRCID IN (1143, 5523, 5822,5777, 5791)"    
     # query = "SELECT TRCID, CASRN, JSON FROM PURE WHERE TRCID IN (5523, 5822)"
     # query = "SELECT TRCID, CASRN, JSON FROM PURE WHERE TRCID IN (5791)"
+    
+    query = "SELECT TRCID, CASRN, JSON FROM PURE ORDER BY TRCID ASC"
+
     cursor.execute(query)
 
     total, saved, skipped = 0, 0, 0

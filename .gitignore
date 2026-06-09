@@ -3,7 +3,7 @@ output/
 logs/
 
 # Old Pipeline Copies
-pipeline_final/
+pipeline_working/
 
 # Documentation Working Area (if not ready)
 Documents/

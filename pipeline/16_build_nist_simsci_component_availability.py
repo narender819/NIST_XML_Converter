@@ -27,30 +27,23 @@ import pandas as pd
 
 from pathlib import Path
 
-# ==================================================
-# CONFIGURATION
-# ==================================================
-RUN_YEAR = "2025"
+from config import (
+    RUN_YEAR,
+    PROCESSED_DIR,
+    ensure_directories
+)
 
-BASE_DIR = Path(r"D:\NIST_XML_Converter")
-
-# ==================================================
-# OUTPUT DIRECTORIES
-# ==================================================
-OUTPUT_DIR = BASE_DIR / "output" / RUN_YEAR
-
-PROCESSED_DIR = (OUTPUT_DIR/ "processed"/ "full_library")
-
-PROCESSED_DIR.mkdir(parents=True,exist_ok=True)
+ensure_directories()
 
 # ==================================================
 # INPUT / OUTPUT FILES
 # ==================================================
-NIST_EXCEL = (PROCESSED_DIR/ f"12_NIST_Component_KeyThermoProperties_{RUN_YEAR}_TCPCAF_UPDATED.xlsx")
 
-SIMSCI_EXCEL = (PROCESSED_DIR/ "2_Libraries_XML_Component_Extract.xlsx")
+NIST_EXCEL = PROCESSED_DIR / f"12_NIST_Component_KeyThermoProperties_{RUN_YEAR}_TCPCAF_UPDATED.xlsx"
 
-OUTPUT_EXCEL = (PROCESSED_DIR/ f"13_NIST_Components_Available_in_SIMSCI_{RUN_YEAR}.xlsx")
+SIMSCI_EXCEL = PROCESSED_DIR / "2_Libraries_XML_Component_Extract.xlsx"
+
+OUTPUT_EXCEL = PROCESSED_DIR / f"13_NIST_Components_Available_in_SIMSCI_{RUN_YEAR}.xlsx"
 
 SIMSCI_SHEETS_PRIORITY = [
     "Edlib_SIMSCI",
@@ -109,7 +102,28 @@ def build_nist_simsci_availability():
         setmin_col = find_column(sim_df, ["SETMIN"])
         setmax_col = find_column(sim_df, ["SETMAX"])
         id_col = find_column(sim_df, ["SIMSCI", "ID"])
-        lib_col = find_column(sim_df, ["LIBRARYID"])
+        # lib_col = find_column(sim_df, ["LIBRARYID"])
+        lib_col = find_column(
+
+    sim_df,
+
+    [
+
+        "LIBRARYID",
+
+        "LIBRARY",
+
+        "LIB_ID",
+
+        "LIB"
+
+    ]
+
+)
+        print(sheet,sim_df.columns.tolist())
+        print(f"{sheet}:", "Library column =", lib_col)
+
+        
 
         if cas_col is None:
             continue
@@ -138,30 +152,113 @@ def build_nist_simsci_availability():
     print("SIMSCI lookup built.")
     print(f"Total unique CAS in lookup: {len(simsci_lookup)}")
 
-    # ---------------------------------------------------
+    # # ---------------------------------------------------
+    # # MATCH NIST USING FAST LOOKUP
+    # # ---------------------------------------------------
+    # rows = []
+    # matched_count = 0
+
+    # for _, nist_row in nist_df.iterrows():
+
+    #     nist_cas = normalize_cas(nist_row["CASNO"])
+    #     if not nist_cas:
+    #         continue
+
+    #     if nist_cas in simsci_lookup:
+
+    #         sim_data = simsci_lookup[nist_cas]
+
+    #         rows.append({
+    #             "NIST ID": nist_row["TRCID"],
+    #             "CASNO": nist_cas,
+    #             "Name": nist_row["ComponentName"],
+    #             **sim_data
+    #         })
+
+    #         matched_count += 1
+    
+
+        # ---------------------------------------------------
     # MATCH NIST USING FAST LOOKUP
     # ---------------------------------------------------
     rows = []
+
     matched_count = 0
+
 
     for _, nist_row in nist_df.iterrows():
 
-        nist_cas = normalize_cas(nist_row["CASNO"])
-        if not nist_cas:
-            continue
+        row = (
+            nist_row
+            .to_dict()
+        )
 
-        if nist_cas in simsci_lookup:
 
-            sim_data = simsci_lookup[nist_cas]
+        nist_cas = normalize_cas(
 
-            rows.append({
-                "NIST ID": nist_row["TRCID"],
-                "CASNO": nist_cas,
-                "Name": nist_row["ComponentName"],
-                **sim_data
-            })
+            nist_row[
+                "CASNO"
+            ]
+
+        )
+
+
+        if (
+
+            nist_cas
+
+            and
+
+            nist_cas in simsci_lookup
+
+        ):
+
+            sim_data = (
+
+                simsci_lookup[
+                    nist_cas
+                ]
+
+            )
+
+
+            row.update(sim_data)       
+
+
+            row[
+                "Available_in_SIMSCI"
+            ] = "Yes"
+
 
             matched_count += 1
+
+
+        else:
+
+            row[
+                "Available_in_SIMSCI"
+            ] = "No"
+
+
+            row[
+                "SIMSCI ID"
+            ] = None
+
+
+            row[
+                "LibraryID"
+            ] = None
+
+
+            row[
+                "Source_Sheet"
+            ] = None
+
+
+
+        rows.append(
+            row
+        )
 
     # ---------------------------------------------------
     # WRITE OUTPUT

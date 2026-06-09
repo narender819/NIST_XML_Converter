@@ -33,69 +33,54 @@ import subprocess
 import time
 from xml.etree.ElementTree import Element, SubElement, ElementTree
 
-# ==================================================
-# CONFIGURATION
-# ==================================================
-RUN_YEAR = "2025"
 
-BASE_DIR = Path(r"D:\NIST_XML_Converter")
-
-# ==================================================
-# PREREQUISITES
-# ==================================================
-PREREQ_DIR = (
-    BASE_DIR
-    / "prerequisites"
+from config import (
+    RUN_YEAR,
+    PREREQ_DIR,
+    OUTPUT_DIR,
+    XML_LIBRARY_DIR,
+    EXECUTABLES_DIR,
+    LIBRARY_OUTPUT_DIR,
+    ensure_directories
 )
 
-EXECUTABLES_DIR = (
-    PREREQ_DIR
-    / "executables"
-    / "FlashDriver"
-    / "S4MThermo"
-    / "Source"
-    / "vc17"
-    / "x64"
-    / "Release"
-)
+ensure_directories()
 
-LM_LIBRARY_BUILD = (
-    EXECUTABLES_DIR
-    / "LMLibraryBuild.exe"
-)
+# ==================================================
+# EXECUTABLE
+# ==================================================
+
+LM_LIBRARY_BUILD = EXECUTABLES_DIR / "LMLibraryBuild.exe"
 
 # ==================================================
 # OUTPUT DIRECTORIES
 # ==================================================
-OUTPUT_DIR = (
-    BASE_DIR
-    / "output"
-    / RUN_YEAR
-)
-
-XML_BASE_DIR = (
-    OUTPUT_DIR
-    / "xml"
-)
-
-LIBRARY_DIR = (
-    OUTPUT_DIR
-    / "libraries"
-)
-
-LIBRARY_DIR.mkdir(
-    parents=True,
-    exist_ok=True
-)
+#  Create final libraries output folder
+LIBRARY_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 # ==================================================
-# XML INPUT
+# XML INPUT DIRECTORY
 # ==================================================
-folder_path = (
-    XML_BASE_DIR
-    / "Libraryfiles_NIST"
-    / "05_blacklist_processed"
-)
+
+XML_INPUT_DIR = XML_LIBRARY_DIR / "05_blacklist_processed"
+
+# ==================================================
+# VALIDATION 
+# ==================================================
+
+if not LM_LIBRARY_BUILD.exists():
+    raise FileNotFoundError(f"Missing executable: {LM_LIBRARY_BUILD}")
+
+if not XML_INPUT_DIR.exists():
+    raise FileNotFoundError(f"Missing XML input folder: {XML_INPUT_DIR}")
+
+# ==================================================
+# DEBUG (optional)
+# ==================================================
+
+print("Executable:", LM_LIBRARY_BUILD)
+print("XML input dir:", XML_INPUT_DIR)
+print("Library output dir:", LIBRARY_OUTPUT_DIR)
 
 # Create root <bank>
 bank = Element("bank", attrib={"type": "PURECOMP", "name": "NIST"})
@@ -107,7 +92,7 @@ def extract_number(filename):
 
 # Get list of xml files
 xml_files = [
-    f for f in os.listdir(str(folder_path))  
+    f for f in os.listdir(str(XML_INPUT_DIR))  
     if f.endswith(".xml") and f != "Bank-PURECOMP-NIST.xml"
 ]
 
@@ -150,7 +135,7 @@ indent(bank)
 
 # Save file
 master_file_path = (
-    folder_path
+    XML_INPUT_DIR
     / "Bank-PURECOMP-NIST.xml"
 )
 ElementTree(bank).write(master_file_path, encoding='utf-8', xml_declaration=True)
@@ -175,13 +160,13 @@ command = [
     ),
 
     str(
-        folder_path
+        XML_INPUT_DIR
         / "Bank-PURECOMP-NIST.xml"
     ),
 
     "-lib=" + str(
-    LIBRARY_DIR
-    / f"NISTL{RUN_YEAR}_BlacklistProcessed_full.lib"
+    LIBRARY_OUTPUT_DIR
+    / f"NISTL{RUN_YEAR}_Full_Library.lib"
 )
 
 ]

@@ -24,52 +24,41 @@ Output:
 
 from pathlib import Path
 from shutil import copyfile
-
 import pandas as pd
 from openpyxl import load_workbook
-
 from pathlib import Path
 
-# ==================================================
-# CONFIGURATION
-# ==================================================
-RUN_YEAR = "2025"
-
-ROOT_DIR = Path(r"D:\NIST_XML_Converter")
+from config import ( RUN_YEAR, PREREQ_DIR, PROCESSED_DIR, XML_DIR,   # optional (only if used later)
+    ensure_directories
+)
 
 # ==================================================
-# PREREQUISITE DIRECTORIES
+# SETUP
 # ==================================================
-PREREQ_DIR = ROOT_DIR / "prerequisites"
+
+ensure_directories()
+
+# ==================================================
+# PREREQUISITE DIRECTORIES (derived locally if needed)
+# ==================================================
 
 EXCEL_INPUT_DIR = PREREQ_DIR / "excel_inputs"
 
 # ==================================================
-# OUTPUT DIRECTORIES
-# ==================================================
-OUTPUT_DIR = ROOT_DIR / "output" / RUN_YEAR
-
-PROCESSED_DIR = OUTPUT_DIR / "processed" / "full_library"
-
-XML_OUTPUT_DIR = OUTPUT_DIR / "xml"
-
-# ==================================================
 # INPUT / OUTPUT FILES
 # ==================================================
-elements_file = (
-    EXCEL_INPUT_DIR
-    / "1_DIPPR_SponsorListofElements.xlsx"
-)
 
-library_file = (
-    PROCESSED_DIR
-    / "1_Libraries_XML_Component_Extract_nodipprsponsor.xlsx"
-)
+elements_file = EXCEL_INPUT_DIR / "1_DIPPR_SponsorListofElements.xlsx"
 
-output_library_file = (
-    PROCESSED_DIR
-    / "2_Libraries_XML_Component_Extract.xlsx"
-)
+library_file = PROCESSED_DIR / f"1_Libraries_XML_Component_Extract_nodipprsponsor.xlsx"
+
+if not elements_file.exists():
+    raise FileNotFoundError(f"Missing: {elements_file}")
+
+if not library_file.exists():
+    raise FileNotFoundError(f"Missing: {library_file}")
+
+output_library_file = PROCESSED_DIR / "2_Libraries_XML_Component_Extract.xlsx"
 
 # ==================================================
 # SHEET CONFIGURATION

@@ -39,73 +39,44 @@ import pandas as pd
 import re
 from pathlib import Path
 
-# ==================================================
-# CONFIGURATION
-# ==================================================
-RUN_YEAR = "2025"
-
-BASE_DIR = Path(r"D:\NIST_XML_Converter")
-
-# ==================================================
-# OUTPUT DIRECTORIES
-# ==================================================
-OUTPUT_DIR = BASE_DIR / "output" / RUN_YEAR
-
-PROCESSED_DIR = (
-    OUTPUT_DIR
-    / "processed"
-    / "full_library"
+from config import (
+    RUN_YEAR,
+    PROCESSED_DIR,
+    ensure_directories
 )
 
-PROCESSED_DIR.mkdir(
-    parents=True,
-    exist_ok=True
-)
+ensure_directories()
 
 # ==================================================
-# INPUT FILES
+# INPUT FILE
 # ==================================================
-excel_file = (
-    PROCESSED_DIR
-    / f"14_NIST_Splitsheets_PE1legacy_Hdepart.xlsx"
-)
+
+excel_file = PROCESSED_DIR / f"14_NIST_Splitsheets_PE1legacy_Hdepart.xlsx"
 
 # ==================================================
 # JSON INPUT / OUTPUT FOLDERS
 # ==================================================
+
+INPUT_MASTER_DIR = PROCESSED_DIR / "1_components_Inmaster_withsimsciid"
+OUTPUT_MASTER_FILL_DIR = PROCESSED_DIR / "1_components_Inmaster_withsimsciid_fillin"
+
+INPUT_ASSIGNED_DIR = PROCESSED_DIR / "3_components_notInmaster_assignedsimsciid"
+OUTPUT_ASSIGNED_FILL_DIR = PROCESSED_DIR / "3_components_notInmaster_assignedsimsciid_fillin"
+
 folder_pairs = [
-
-    (
-        PROCESSED_DIR
-        / "1_components_Inmaster_withsimsciid",
-
-        PROCESSED_DIR
-        / "1_components_Inmaster_withsimsciid_fillin"
-    ),
-
-    (
-        PROCESSED_DIR
-        / "3_components_notInmaster_assignedsimsciid",
-
-        PROCESSED_DIR
-        / "3_components_notInmaster_assignedsimsciid_fillin"
-    )
+    (INPUT_MASTER_DIR, OUTPUT_MASTER_FILL_DIR),
+    (INPUT_ASSIGNED_DIR, OUTPUT_ASSIGNED_FILL_DIR),
 ]
 
-# Create output folders
+#  Create ONLY output folders
 for _, output_folder in folder_pairs:
-    output_folder.mkdir(
-        parents=True,
-        exist_ok=True
-    )
+    output_folder.mkdir(parents=True, exist_ok=True)
 
 # ==================================================
 # AUDIT OUTPUT
 # ==================================================
-audit_output = (
-    PROCESSED_DIR
-    / "14a_fill_missing_thermo_properties_audit.xlsx"
-)
+
+audit_output = PROCESSED_DIR / "14a_fill_missing_thermo_properties_audit.xlsx"
 
 WATER_DENSITY = 997.978
 ENABLE_HDN = True

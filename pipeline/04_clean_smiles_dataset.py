@@ -29,32 +29,30 @@ import pandas as pd
 
 from pathlib import Path
 
-# ==================================================
-# CONFIGURATION
-# ==================================================
-RUN_YEAR = "2025" 
+from config import (
+    RUN_YEAR,
+    OUTPUT_DIR,
+    ensure_directories
+)
 
-BASE_DIR = Path(r"D:\NIST_XML_Converter")
+ensure_directories()
 
 # ==================================================
 # OUTPUT DIRECTORIES
 # ==================================================
-OUTPUT_DIR = BASE_DIR / "output" / RUN_YEAR
 
 SMILES_OUTPUT_DIR = OUTPUT_DIR / "smiles"
 
 # ==================================================
 # INPUT / OUTPUT FILES
 # ==================================================
-INPUT_FILE = (
-    SMILES_OUTPUT_DIR
-    / f"1_compounds_smiles_{RUN_YEAR}.xlsx"
-)
 
-OUTPUT_FILE = (
-    SMILES_OUTPUT_DIR
-    / f"2_compounds_smiles_{RUN_YEAR}_removedblanks.xlsx"
-)
+INPUT_FILE = SMILES_OUTPUT_DIR / f"1_compounds_smiles_{RUN_YEAR}.xlsx"
+
+if not INPUT_FILE.exists():
+    raise FileNotFoundError(f"Missing input: {INPUT_FILE}")
+
+OUTPUT_FILE = SMILES_OUTPUT_DIR / f"2_compounds_smiles_{RUN_YEAR}_removedblanks.xlsx"
 
 def clean_cas(cas):
     """Clean CASRN: remove .0 if float-like, strip spaces, drop NaN."""

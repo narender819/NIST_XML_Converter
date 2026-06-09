@@ -1,131 +1,226 @@
-"""
-Script:
-    20_merge_nist_phasewise_with_simsci_metadata.py
-
-Purpose:
-    This script merges NIST phasewise thermodynamic workflow data
-    with existing SIMSCI component metadata and availability information.
-
-Functionality:
-    - Reads NIST phasewise workflow Excel sheets
-    - Reads SIMSCI component availability metadata
-    - Merges datasets using CAS numbers
-    - Adds SIMSCI availability status
-    - Preserves all phasewise workflow sheets
-    - Generates a consolidated multi-sheet Excel report
-
-Input:
-    - NIST phasewise workflow Excel file
-    - SIMSCI availability Excel file
-
-Output:
-    Multi-sheet Excel report containing merged NIST and SIMSCI metadata
-"""
-
-
 import pandas as pd
 import numpy as np
-
 from pathlib import Path
 
-# ==================================================
-# CONFIGURATION
-# ==================================================
-RUN_YEAR = "2025"
 
-BASE_DIR = Path(r"D:\NIST_XML_Converter")
-
-# ==================================================
-# OUTPUT DIRECTORIES
-# ==================================================
-OUTPUT_DIR = BASE_DIR / "output" / RUN_YEAR
-
-PROCESSED_DIR = (
-    OUTPUT_DIR
-    / "processed"
-    / "full_library"
+from config import (
+    RUN_YEAR,
+    PROCESSED_DIR,
+    ensure_directories
 )
 
-PROCESSED_DIR.mkdir(
-    parents=True,
-    exist_ok=True
-)
+ensure_directories()
 
 # ==================================================
-# INPUT / OUTPUT FILES
+# INPUT FILES
 # ==================================================
-NIST_EXCEL = (
-    PROCESSED_DIR
-    / f"14_NIST_Splitsheets_PE1legacy_Hdepart.xlsx"
-)
 
-SIMSCI_AVAIL_EXCEL = (
-    PROCESSED_DIR
-    / f"13_NIST_Components_Available_in_SIMSCI_{RUN_YEAR}.xlsx"
-)
+NIST_EXCEL = PROCESSED_DIR / "14_NIST_Splitsheets_PE1legacy_Hdepart.xlsx"
 
-OUTPUT_EXCEL = (
-    PROCESSED_DIR
-    / f"15_NIST_Phasewise_With_SIMSCI_Metadata.xlsx"
-)
+SIMSCI_EXCEL = PROCESSED_DIR / f"13_NIST_Components_Available_in_SIMSCI_{RUN_YEAR}.xlsx"
 
-# ---------------------------------------------------
-# MERGE LOGIC
-# ---------------------------------------------------
-def merge_nist_simsci_metadata():
+# ==================================================
+# OUTPUT FILE
+# ==================================================
 
-    # Read SIMSCI availability (single sheet)
-    simsci_df = pd.read_excel(SIMSCI_AVAIL_EXCEL)
+OUTPUT_EXCEL = PROCESSED_DIR / "15_NIST_Phasewise_With_SIMSCI_Metadata.xlsx"
 
-    # Drop technical / tracking columns if present
-    simsci_df = simsci_df.drop(
-        columns=["S.No", "RowID", "NIST ID"],
-        errors="ignore"
+
+def normalize_cas(cas):
+
+    if pd.isna(cas):
+        return None
+
+    cas = str(cas).strip()
+
+    if cas.endswith(".0"):
+        cas = cas[:-2]
+
+    return "".join(
+        c
+        for c in cas
+        if c.isdigit()
     )
 
-    # Normalize CAS as string (safety)
-    simsci_df["CASNO"] = simsci_df["CASNO"].astype(str)
 
-    # Read ALL sheets from NIST Excel
-    nist_sheets = pd.read_excel(NIST_EXCEL, sheet_name=None)
+def merge_nist_simsci():
 
-    output_sheets = {}
+    simsci = pd.read_excel(
+        SIMSCI_EXCEL
+    )
 
-    for sheet_name, nist_df in nist_sheets.items():
+    keep_cols = [
 
-        nist_df["CASNO"] = nist_df["CASNO"].astype(str)
+        "CASNO",
 
-        # ---- MERGE ON CASNO ----
-        merged_df = nist_df.merge(
-            simsci_df,
+        "SIMSCI ID",
+
+        "LibraryID",
+
+        "Source_Sheet",
+
+        "LEtmin_simsci",
+        "LEtmax_simsci",
+
+        "IEtmin_simsci",
+        "IEtmax_simsci",
+
+        "SEtmin_simsci",
+        "SEtmax_simsci"
+
+    ]
+
+    keep_cols = [
+        c
+        for c in keep_cols
+        if c in simsci.columns
+    ]
+
+    simsci = simsci[
+        keep_cols
+    ]
+
+    simsci["CASNO"] = (
+        simsci["CASNO"]
+        .apply(normalize_cas)
+    )
+
+    # remove duplicate CAS
+    simsci = (
+        simsci
+        .drop_duplicates(
+            subset=["CASNO"],
+            keep="first"
+        )
+    )
+
+    print(
+    "SIMSCI components with valid ID:",
+        simsci["SIMSCI ID"]
+        .notna()
+        .sum()
+    )
+
+    print("Total SIMSCI components:", len(simsci))
+
+
+    nist_sheets = pd.read_excel(
+        NIST_EXCEL,
+        sheet_name=None
+    )
+
+    output = {}
+
+
+    for sheet, df in nist_sheets.items():
+
+        print(
+            "\nProcessing:",
+            sheet
+        )
+
+        df["CASNO"] = (
+            df["CASNO"]
+            .apply(
+                normalize_cas
+            )
+        )
+        # print("Unique NIST CAS:", df["CASNO"].nunique())
+
+        # print(
+        #     "Unique SIMSCI CAS:",
+        #     simsci["CASNO"].nunique()
+        # )
+
+        # print(
+        #     "Intersection:",
+        #     len(
+        #         set(df["CASNO"])
+        #         &
+        #         set(simsci["CASNO"])
+        #     )
+        # )
+
+        merged = df.merge(
+
+            simsci,
+
             on="CASNO",
-            how="left"
+
+            how="left",
+
+            validate="many_to_one"
+
         )
 
-        # ---- ADD AVAILABILITY FLAG ----
-        merged_df["Available_in_SIMSCI"] = np.where(
-            merged_df["SIMSCI ID"].notna(),
+
+        merged[
+            "Available_in_SIMSCI"
+        ] = np.where(
+
+            merged[
+                "SIMSCI ID"
+            ].notna(),
+
             "Yes",
+
             "No"
+
+        )
+        print("Total Yes:",(merged["Available_in_SIMSCI"]=="Yes").sum())
+
+        print("Total No:",(merged["Available_in_SIMSCI"]=="No").sum())
+
+        print( "Input rows:", len(df))
+
+        print(
+
+            "Output rows:",
+            len(merged)
+
         )
 
-        # ---- OPTIONAL: move flag to end ----
-        cols = [c for c in merged_df.columns if c != "Available_in_SIMSCI"]
-        cols.append("Available_in_SIMSCI")
-        merged_df = merged_df[cols]
+        print(
 
-        output_sheets[sheet_name] = merged_df
+            "Matched:",
 
-        print(f"Merged SIMSCI metadata into sheet: {sheet_name}")
+            merged[
+                "Available_in_SIMSCI"
+            ].eq(
+                "Yes"
+            ).sum()
 
-    # ---- WRITE MULTI-SHEET OUTPUT ----
-    with pd.ExcelWriter(OUTPUT_EXCEL, engine="openpyxl") as writer:
-        for sheet_name, df in output_sheets.items():
-            df.to_excel(writer, sheet_name=sheet_name, index=False)
+        )
 
-    print("\nScript-2 completed successfully")
-    print("Output written to:", OUTPUT_EXCEL)
+
+        output[
+            sheet
+        ] = merged
+
+
+    with pd.ExcelWriter(
+        OUTPUT_EXCEL,
+        engine="openpyxl"
+    ) as writer:
+
+        for sheet, df in output.items():
+
+            df.to_excel(
+
+                writer,
+
+                sheet_name=sheet,
+
+                index=False
+
+            )
+
+
+    print(
+        "\nCompleted"
+    )
 
 
 if __name__ == "__main__":
-    merge_nist_simsci_metadata()
+
+    merge_nist_simsci()

@@ -29,44 +29,36 @@ from pathlib import Path
 import pandas as pd
 import os
 
-# ==================================================
-# CONFIGURATION
-# ==================================================
-RUN_YEAR = "2025"
+from config import (
+    RUN_YEAR,
+    PREREQ_DIR,
+    PROCESSED_DIR,
+    ensure_directories
+)
 
-BASE_DIR = Path(r"D:\NIST_XML_Converter")
+ensure_directories()
 
 # ==================================================
-# PREREQUISITE DIRECTORIES
+# PREREQUISITE DIRECTORIES (derived locally)
 # ==================================================
-PREREQ_DIR = BASE_DIR / "prerequisites"
 
 EXCEL_INPUT_DIR = PREREQ_DIR / "excel_inputs"
 
 # ==================================================
-# OUTPUT DIRECTORIES
-# ==================================================
-OUTPUT_DIR = BASE_DIR / "output" / RUN_YEAR
-
-PROCESSED_DIR = OUTPUT_DIR / "processed" / "full_library"
-
-# ==================================================
 # INPUT / OUTPUT FILES
 # ==================================================
-MAIN_FILE = (
-    PROCESSED_DIR
-    / "4_DIPPR_Family_Extraction_All_json.xlsx"
-)
 
-CODES_FILE = (
-    EXCEL_INPUT_DIR
-    / "3_DIPPR_Codes_family_subfamily_List.xlsx"
-)
+MAIN_FILE = PROCESSED_DIR / "4_DIPPR_Family_Extraction_All_json.xlsx"
 
-OUTPUT_FILE = (
-    PROCESSED_DIR
-    / "5_DIPPR_Family_Extraction_withfamilyAbbrevations.xlsx"
-)
+CODES_FILE = EXCEL_INPUT_DIR / "3_DIPPR_Codes_family_subfamily_List.xlsx"
+
+if not MAIN_FILE.exists():
+    raise FileNotFoundError(f"Missing input: {MAIN_FILE}")
+
+if not CODES_FILE.exists():
+    raise FileNotFoundError(f"Missing input: {CODES_FILE}")
+
+OUTPUT_FILE = PROCESSED_DIR / "5_DIPPR_Family_Extraction_withfamilyAbbrevations.xlsx"
 
 # ------------------------------------------------------
 # STEP 1 — Load the two Excel files
