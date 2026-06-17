@@ -1,3 +1,34 @@
+"""Script:
+43_extract_tc_pc_omega_from_icas.py
+
+Purpose:
+This script extracts Critical Temperature (TC), Critical Pressure (PC), and Acentric Factor (OMEGA) values from ICAS processed output files and maps the extracted properties back to the corresponding NIST components using SMILES information.
+
+Functionality:
+- Reads the TC/PC missing components dataset containing SMILES information.
+- Processes ICAS output text files generated from SMILES batch execution.
+- Extracts TC, PC, and OMEGA property values from ICAS results.
+- Identifies invalid SMILES records reported by ICAS.
+- Maps extracted properties to components using normalized SMILES matching.
+- Classifies records as FOUND, INVALID_SMILES, PROPERTY_MISSING, or NOT_FOUND.
+- Generates extraction statistics and summary information.
+- Creates a consolidated property recovery report for downstream processing.
+
+Input:
+- TC/PC Missing Components with SMILES Excel report.
+- ICAS processed output text files.
+
+Output:
+- TC/PC/OMEGA extraction Excel report containing:
+- DATA sheet
+- SUMMARY sheet
+- Extracted TC values.
+- Extracted PC values.
+- Extracted OMEGA values.
+- Property recovery status for each component.
+"""
+
+
 import os
 from pathlib import Path
 import pandas as pd

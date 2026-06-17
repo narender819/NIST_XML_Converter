@@ -1,3 +1,27 @@
+"""Script:
+40_merge_tc_pc_missing_components.py
+
+Purpose:
+This script consolidates components with missing Critical Temperature (TC) and Critical Pressure (PC) values into a single report for ICAS processing and recovery activities.
+
+Functionality:
+- Reads the TC missing component report.
+- Reads the PC missing component report.
+- Standardizes status information for TC and PC properties.
+- Merges TC and PC missing component records using TRCID.
+- Preserves all missing property records during the merge process.
+- Generates a consolidated TC/PC missing component report.
+- Prepares the dataset for downstream ICAS extraction activities.
+
+Input:
+- TC/PC Missing Report Excel file.
+
+Output:
+- Consolidated TC/PC Missing Components Excel report.
+"""
+
+
+
 import pandas as pd
 
 from config import TC_PC_MISSING_REPORT, TC_PC_MERGED_FILE

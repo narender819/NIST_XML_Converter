@@ -1,3 +1,33 @@
+"""
+Script:
+41_append_smiles_to_tc_pc_missing.py
+
+Purpose:
+This script enriches the TC/PC missing component dataset by appending CAS Number and SMILES information required for ICAS processing and property recovery activities.
+
+Functionality:
+- Reads the consolidated TC/PC missing component report.
+- Reads the master SMILES dataset.
+- Matches components using TRCID.
+- Appends CAS Number and SMILES information to the missing component dataset.
+- Identifies components with available SMILES information.
+- Identifies components with missing SMILES information.
+- Generates separate reports for matched and unmatched SMILES records.
+- Creates a consolidated dataset for downstream ICAS processing.
+
+Input:
+- Consolidated TC/PC Missing Components Excel report.
+- Master SMILES Excel file.
+
+Output:
+- TC/PC Missing Components with SMILES Excel report containing:
+- ALL_DATA sheet
+- SMILES_FOUND sheet
+- SMILES_MISSING sheet
+"""
+
+
+
 import pandas as pd
 
 

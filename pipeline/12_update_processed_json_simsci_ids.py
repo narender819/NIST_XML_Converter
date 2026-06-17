@@ -1,6 +1,6 @@
 """
 Script:
-    11a_assign_simsci_ids_to_unmatched_json.py
+    12_assign_simsci_ids_to_unmatched_json.py
 
 Purpose:
     This script updates processed component JSON files with

@@ -1,3 +1,29 @@
+"""
+Script:
+39_generate_tc_pc_missing_report.py
+
+Purpose:
+This script identifies components with missing Critical Temperature (TC) and Critical Pressure (PC) values from processed component JSON files and generates a consolidated report for further recovery and validation activities.
+
+Functionality:
+- Reads processed component JSON files from configured component folders.
+- Checks the availability of TC and PC properties.
+- Identifies components with missing TC values.
+- Identifies components with missing PC values.
+- Extracts TRCID information for affected components.
+- Generates separate reports for missing TC and missing PC properties.
+- Creates a consolidated Excel workbook for review and downstream processing.
+
+Input:
+- Processed component JSON files.
+
+Output:
+- TC/PC Missing Report Excel file containing:
+- TC_Missing sheet
+- PC_Missing sheet """
+
+
+
 from pathlib import Path
 import json
 import pandas as pd

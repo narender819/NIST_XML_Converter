@@ -1,3 +1,29 @@
+"""Script:
+42_generate_icas_smiles_batches.py
+
+Purpose:
+This script prepares SMILES batch files for ICAS processing by splitting the SMILES dataset into manageable text files containing a fixed number of records per batch.
+
+Functionality:
+- Reads the TC/PC missing components dataset containing SMILES information.
+- Extracts SMILES records from the SMILES_FOUND worksheet.
+- Splits the SMILES dataset into batches of 1000 records.
+- Generates sequentially named text files for each batch.
+- Writes SMILES strings to ICAS-compatible text files.
+- Creates batch files required for downstream ICAS property recovery processing.
+
+Input:
+- TC/PC Missing Components with SMILES Excel report.
+
+Output:
+- SMILES batch text files (1000 records per file) stored in the ICAS batch folder.
+- Files named using the format:
+- 1_Smiles_TC_PC_Missing_NIST_1to1000_raw.txt
+- 1001_Smiles_TC_PC_Missing_NIST_1001to2000_raw.txt
+- ...
+"""
+
+
 # I have an excel sheet D:\NIST_XML_Converter\prerequisites\Smiles_Prep_ICAS\NIST_TC_PC_SMILES_Merged_sep.xlsx which comtain sheet name "SMILES_FOUND" and sample data is like TRCID	TC_Status	PC_Status	CASRN	SMILES
 #5	PROPERTY_MISSING	PROPERTY_MISSING	2004037	Cc1ncnc2[nH]cnc12 now my task to copy those smiles in to  txt file automatically satrting 1 to 10000 in one txt file & next 1001 to 2000 in next file & so on untli the list completes(Total smiles list: 11712). name od the next file is like 1_Smiles_TC_PC_Missing_NIST_1to1000_raw.txt 1_Smiles_TC_PC_Missing_NIST_1001to2000_raw.txt & so on. path of txt files is D:\NIST_XML_Converter\prerequisites\Smiles_Prep_ICAS\raw1
 

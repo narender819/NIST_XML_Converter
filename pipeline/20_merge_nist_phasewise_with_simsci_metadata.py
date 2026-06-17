@@ -1,3 +1,33 @@
+"""Script:
+20_merge_nist_phasewise_with_simsci_metadata.py
+
+Purpose:
+This script enriches the NIST phase-wise thermodynamic datasets with corresponding SIMSCI component metadata and availability information to support downstream thermodynamic completion and reconciliation activities.
+
+Functionality:
+- Reads NIST phase-wise thermodynamic datasets.
+- Reads SIMSCI component availability and metadata information.
+- Normalizes CAS numbers for consistent matching.
+- Matches NIST components with SIMSCI components using CAS numbers.
+- Appends SIMSCI identifiers, library information, and temperature range metadata.
+- Identifies whether each NIST component is available in SIMSCI libraries.
+- Preserves phase-wise NIST thermodynamic data while enriching it with SIMSCI metadata.
+- Generates updated phase-wise datasets for downstream thermodynamic processing.
+
+Input:
+- NIST phase-wise thermodynamic Excel workbook.
+- NIST-SIMSCI component availability Excel report.
+
+Output:
+- Phase-wise NIST datasets enriched with SIMSCI metadata and availability information.
+- Excel workbook containing updated phase-wise sheets with:
+- SIMSCI ID
+- Library ID
+- Source Sheet
+- SIMSCI temperature range metadata
+- Component availability status
+
+"""
 import pandas as pd
 import numpy as np
 from pathlib import Path
